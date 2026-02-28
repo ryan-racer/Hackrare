@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  role          String    // "patient" | "doctor"
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  patientLinks   PatientDoctor[] @relation("Patient")
+  doctorLinks    PatientDoctor[] @relation("Doctor")
+  checkIns       CheckIn[]       @relation("PatientCheckIns")
+  journalAssignments JournalAssignment[]
+  aiInsights     AIInsight[]
+}
+
+model AIInsight {
+  id         String   @id @default(cuid())
+  patientId  String
+  content    String
+  summaryIds String?  // JSON array of checkInSummary ids used
+  createdAt  DateTime @default(now())
+
+  patient User @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PatientDoctor {
+  id        String   @id @default(cuid())
+  patientId String
+  doctorId  String
+  createdAt DateTime @default(now())
+
+  patient User @relation("Patient", fields: [patientId], references: [id], onDelete: Cascade)
+  doctor User @relation("Doctor", fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@unique([patientId, doctorId])
+}
+
+model JournalTemplate {
+  id           String   @id @default(cuid())
+  name         String
+  condition    String
+  schedule     String?  // e.g. "daily", "0 9 * * *" cron
+  questionFlow String   // JSON
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assignments JournalAssignment[]
+  checkIns    CheckIn[]
+}
+
+model JournalAssignment {
+  id         String   @id @default(cuid())
+  patientId  String
+  templateId String
+  frequencyOverride String? // optional override
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  patient  User             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  template JournalTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([patientId, templateId])
+}
+
+model CheckIn {
+  id         String   @id @default(cuid())
+  patientId  String
+  templateId String
+  scheduledAt DateTime
+  status     String   // "pending" | "in_progress" | "completed"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  patient  User             @relation("PatientCheckIns", fields: [patientId], references: [id], onDelete: Cascade)
+  template JournalTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  messages CheckInMessage[]
+  response CheckInResponse?
+  summary  CheckInSummary?
+}
+
+model CheckInMessage {
+  id        String   @id @default(cuid())
+  checkInId String
+  role      String   // "assistant" | "user"
+  content   String
+  createdAt DateTime @default(now())
+
+  checkIn CheckIn @relation(fields: [checkInId], references: [id], onDelete: Cascade)
+}
+
+model CheckInResponse {
+  id        String   @id @default(cuid())
+  checkInId String   @unique
+  rawData   String   // JSON object of answers
+  updatedAt DateTime @updatedAt
+
+  checkIn CheckIn @relation(fields: [checkInId], references: [id], onDelete: Cascade)
+}
+
+model CheckInSummary {
+  id             String   @id @default(cuid())
+  checkInId      String   @unique
+  medicalSummary String
+  modelUsed      String?
+  createdAt      DateTime @default(now())
+
+  checkIn CheckIn @relation(fields: [checkInId], references: [id], onDelete: Cascade)
+}
