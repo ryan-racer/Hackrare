@@ -15,6 +15,7 @@ model User {
   role          String    // "patient" | "doctor"
   emailVerified DateTime?
   image         String?
+  phone         String?  @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
