@@ -38,6 +38,15 @@ export type EvidencePackResult = {
   reportMd: string;
   hpoTerms: HpoTerm[];
   candidateConditions: CandidateCondition[];
+  recommendedTests: RecommendedTest[];
+};
+
+export type RecommendedTest = {
+  test: string; // e.g. "Whole-exome sequencing (WES)"
+  rationale: string; // why it's relevant for this patient's phenotype
+  category: "genetic" | "imaging" | "lab" | "functional" | "biopsy" | "referral" | "other";
+  urgency: "routine" | "soon" | "urgent";
+  // No external URLs generated — avoids broken links
 };
 
 export type SymptomEntry = {
@@ -75,6 +84,7 @@ export async function buildEvidencePack(
       reportMd: "[Evidence pack unavailable: OPENAI_API_KEY not set]",
       hpoTerms: [],
       candidateConditions: [],
+      recommendedTests: [],
     };
   }
 
@@ -108,7 +118,8 @@ CRITICAL RULES:
 - Only output OrphaCodes or PMIDs you are highly confident exist. Otherwise set verified:false and omit the ID.
 - Candidate conditions are NOT diagnoses. Always frame as "conditions to consider / discuss with clinician".
 - Maximum 8 candidate conditions.
-- Be precise, use clinical language for clinician sections.`;
+- Be precise, use clinical language for clinician sections.
+- For testsToDiscuss: recommend specific, actionable clinical tests and specialist referrals. Use full clinical names (e.g. "Whole-exome sequencing (WES)", "Lysosomal enzyme assay panel", "MRI brain with FLAIR sequences"). Do NOT include any URLs — rationales must stand alone without links. Include 5–12 tests tailored to the candidate conditions and phenotype. Assign urgency based on safety (urgent) vs. workup priority (soon/routine).`;
 
   const userPrompt = `Patient: ${patient.name}${patient.dateOfBirth ? `, DOB: ${patient.dateOfBirth}` : ""}
 Known diagnoses: ${patient.currentDiagnoses?.join(", ") || "None recorded"}
@@ -141,7 +152,14 @@ Your task: Produce a JSON object with this EXACT structure:
   ],
   "patientSummary": "one paragraph clinical summary of the patient's symptom picture",
   "clinicianQuestions": ["question 1", ...],
-  "testsToDiscuss": ["test/topic 1", ...]
+  "testsToDiscuss": [
+    {
+      "test": "string — exact clinical test or specialist referral name (e.g. 'Whole-exome sequencing (WES)', 'Lysosomal enzyme panel', 'MRI brain with FLAIR', 'Rheumatology referral')",
+      "rationale": "one sentence explaining why this test is relevant to the phenotype and candidate conditions above",
+      "category": "genetic | imaging | lab | functional | biopsy | referral | other",
+      "urgency": "routine | soon | urgent"
+    }
+  ]
 }
 
 Only output valid JSON. No markdown fences. No extra text.`;
@@ -151,7 +169,12 @@ Only output valid JSON. No markdown fences. No extra text.`;
     candidateConditions: CandidateCondition[];
     patientSummary: string;
     clinicianQuestions: string[];
-    testsToDiscuss: string[];
+    testsToDiscuss: Array<{
+      test: string;
+      rationale: string;
+      category: string;
+      urgency: string;
+    }> | string[];
   };
 
   try {
@@ -173,6 +196,7 @@ Only output valid JSON. No markdown fences. No extra text.`;
       reportMd: "[Evidence pack generation failed]",
       hpoTerms: [],
       candidateConditions: [],
+      recommendedTests: [],
     };
   }
 
@@ -183,6 +207,29 @@ Only output valid JSON. No markdown fences. No extra text.`;
   }));
 
   const candidateConditions: CandidateCondition[] = (parsed.candidateConditions ?? []);
+
+  // Normalise testsToDiscuss — model may return old string[] or new object[]
+  const rawTests = parsed.testsToDiscuss ?? [];
+  const recommendedTests: RecommendedTest[] = rawTests.map((t) => {
+    if (typeof t === "string") {
+      return {
+        test: t,
+        rationale: "",
+        category: "other" as const,
+        urgency: "routine" as const,
+      };
+    }
+    return {
+      test: t.test ?? "",
+      rationale: t.rationale ?? "",
+      category: (["genetic","imaging","lab","functional","biopsy","referral","other"].includes(t.category)
+        ? t.category
+        : "other") as RecommendedTest["category"],
+      urgency: (["routine","soon","urgent"].includes(t.urgency)
+        ? t.urgency
+        : "routine") as RecommendedTest["urgency"],
+    };
+  });
 
   // Build markdown report
   const now = new Date().toISOString().split("T")[0];
@@ -222,8 +269,33 @@ ${refs}`;
     ? parsed.clinicianQuestions.map((q) => `- ${q}`).join("\n")
     : "_None generated_";
 
-  const testsSection = parsed.testsToDiscuss?.length
-    ? parsed.testsToDiscuss.map((t) => `- ${t}`).join("\n")
+  const urgencyOrder: Record<string, number> = { urgent: 0, soon: 1, routine: 2 };
+  const categoryEmoji: Record<string, string> = {
+    genetic: "🧬",
+    imaging: "🖼️",
+    lab: "🔬",
+    functional: "⚙️",
+    biopsy: "🔬",
+    referral: "👨‍⚕️",
+    other: "📋",
+  };
+  const sortedTests = [...recommendedTests].sort(
+    (a, b) => (urgencyOrder[a.urgency] ?? 2) - (urgencyOrder[b.urgency] ?? 2)
+  );
+  const testsSection = sortedTests.length
+    ? sortedTests
+        .map((t) => {
+          const icon = categoryEmoji[t.category] ?? "📋";
+          const urgencyTag =
+            t.urgency === "urgent"
+              ? " **⚠️ urgent**"
+              : t.urgency === "soon"
+              ? " _(soon)_"
+              : "";
+          const rationale = t.rationale ? `\n  > ${t.rationale}` : "";
+          return `- ${icon} **${t.test}**${urgencyTag}${rationale}`;
+        })
+        .join("\n")
     : "_None generated_";
 
   const reportMd = `# SignalBridge Evidence Pack
@@ -261,5 +333,5 @@ ${testsSection}
 ---
 _Generated by SignalBridge · All HPO IDs marked "needs verification" require manual confirmation · Candidates are for discussion, not diagnosis_`;
 
-  return { reportMd, hpoTerms, candidateConditions };
+  return { reportMd, hpoTerms, candidateConditions, recommendedTests };
 }

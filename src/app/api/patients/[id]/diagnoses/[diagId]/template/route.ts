@@ -2,6 +2,49 @@ import { NextResponse } from "next/server";
 import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { generateDiseaseTemplate } from "@/lib/llm/disease-template";
+import type { CheckinTemplateJson } from "@/lib/llm/disease-template";
+
+/** Convert Agent-4 CheckinTemplateJson (sections/fields) → JournalTemplate questionFlow format */
+function toQuestionFlow(template: CheckinTemplateJson): string {
+  type Question = {
+    id: string;
+    type: string;
+    prompt: string;
+    options?: string[];
+    min?: number;
+    max?: number;
+    hint?: string;
+  };
+
+  const questions: Question[] = [];
+
+  for (const section of template.sections ?? []) {
+    for (const field of section.fields ?? []) {
+      const q: Question = {
+        id: field.id,
+        type:
+          field.type === "slider"
+            ? "scale"
+            : field.type === "select" || field.type === "checklist"
+            ? "choice"
+            : field.type === "boolean"
+            ? "boolean"
+            : "text",
+        prompt: field.label + (field.hint ? ` (${field.hint})` : ""),
+      };
+      if (q.type === "scale") {
+        q.min = field.min ?? 0;
+        q.max = field.max ?? 10;
+      }
+      if (q.type === "choice" && field.options?.length) {
+        q.options = field.options;
+      }
+      questions.push(q);
+    }
+  }
+
+  return JSON.stringify({ questions });
+}
 
 // POST /api/patients/[id]/diagnoses/[diagId]/template — Agent 4: generate check-in templates
 export async function POST(
@@ -23,7 +66,7 @@ export async function POST(
 
   const result = await generateDiseaseTemplate(diagnosis.diseaseLabel, diagnosis.diseaseId);
 
-  // Store all three cadence templates
+  // Store all three cadence CheckinTemplate records
   const templates = await Promise.all([
     prisma.checkinTemplate.create({
       data: {
@@ -48,10 +91,41 @@ export async function POST(
     }),
   ]);
 
+  // --- Wire into the existing check-in flow ---
+  // Convert daily template to JournalTemplate questionFlow and assign to patient
+
+  const questionFlowJson = toQuestionFlow(result.dailyTemplate);
+
+  // Create a new JournalTemplate for this disease
+  const journalTemplate = await prisma.journalTemplate.create({
+    data: {
+      name: `${diagnosis.diseaseLabel} Daily Check-In`,
+      condition: diagnosis.diseaseLabel,
+      schedule: "daily",
+      questionFlow: questionFlowJson,
+    },
+  });
+
+  // Deactivate any existing active assignments for this patient
+  await prisma.journalAssignment.updateMany({
+    where: { patientId, active: true },
+    data: { active: false },
+  });
+
+  // Create new assignment for the disease-specific template
+  await prisma.journalAssignment.create({
+    data: {
+      patientId,
+      templateId: journalTemplate.id,
+      active: true,
+    },
+  });
+
   return NextResponse.json(
     {
       templates,
       alertRules: result.alertRules,
+      journalTemplateId: journalTemplate.id,
     },
     { status: 201 }
   );

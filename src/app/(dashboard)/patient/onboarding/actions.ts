@@ -14,8 +14,12 @@ const bodySchema = z.object({
   weightKg: z.number().positive(),
   phone: z
     .string()
-    .min(1, "Phone is required for SMS check-ins.")
-    .refine((v) => E164_REGEX.test(v.trim()), "Phone must be E.164 format (e.g. +15551234567)"),
+    .optional()
+    .nullable()
+    .refine(
+      (v) => !v || !v.trim() || E164_REGEX.test(v.trim()),
+      "Phone must be E.164 format (e.g. +15551234567)"
+    ),
   pcpName: z.string().optional().nullable(),
   pcpCity: z.string().optional().nullable(),
   pcpState: z.string().max(2).optional().nullable(),
@@ -71,7 +75,7 @@ export async function submitOnboarding(
   }
 
   const userId = sessionWithUser.user.id;
-  const normalizedPhone = body.phone.trim();
+  const normalizedPhone = body.phone?.trim() || null;
 
   await prisma.user.update({
     where: { id: userId },
@@ -83,7 +87,7 @@ export async function submitOnboarding(
         }),
       ...(body.heightCm != null && { heightCm: body.heightCm }),
       ...(body.weightKg != null && { weightKg: body.weightKg }),
-      phone: normalizedPhone,
+      ...(normalizedPhone != null && { phone: normalizedPhone }),
       ...(body.pcpName != null && { pcpName: body.pcpName }),
       ...(body.pcpCity != null && { pcpCity: body.pcpCity || null }),
       ...(body.pcpState != null && { pcpState: body.pcpState || null }),
@@ -98,13 +102,15 @@ export async function submitOnboarding(
     },
   });
 
-  try {
-    await sendSmsMessage(
-      normalizedPhone,
-      "Hi! You're signed up for symptom tracking. We'll check in with you about your symptoms. Reply anytime to log how you're feeling."
-    );
-  } catch (e) {
-    console.error("SMS welcome message failed:", e);
+  if (normalizedPhone) {
+    try {
+      await sendSmsMessage(
+        normalizedPhone,
+        "Hi! You're signed up for symptom tracking. We'll check in with you about your symptoms. Reply anytime to log how you're feeling."
+      );
+    } catch (e) {
+      console.error("SMS welcome message failed:", e);
+    }
   }
 
   return { ok: true };

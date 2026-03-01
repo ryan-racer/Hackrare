@@ -139,7 +139,7 @@ export async function POST(
     allergies: patient.allergies,
   };
 
-  const { reportMd, hpoTerms, candidateConditions } = await buildEvidencePack(
+  const { reportMd, hpoTerms, candidateConditions, recommendedTests } = await buildEvidencePack(
     patientContext,
     symptomEntries,
     periodDays
@@ -157,5 +157,5 @@ export async function POST(
     },
   });
 
-  return NextResponse.json(report, { status: 201 });
+  return NextResponse.json({ ...report, recommendedTests }, { status: 201 });
 }

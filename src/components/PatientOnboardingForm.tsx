@@ -139,7 +139,7 @@ export function PatientOnboardingForm({
       if (!name.trim()) return false;
       if (!dateOfBirth.trim()) return false;
       if (!isAtLeast18(dateOfBirth)) return false;
-      if (!isValidE164(phone)) return false;
+      if (phone.trim() && !isValidE164(phone)) return false;
       const h = getHeightCm();
       if (h == null || h <= 0) return false;
       const w = getWeightKg();
@@ -161,8 +161,7 @@ export function PatientOnboardingForm({
       if (!name.trim()) return "Name is required.";
       if (!dateOfBirth.trim()) return "Date of birth is required.";
       if (!isAtLeast18(dateOfBirth)) return "You must be 18 or older to use this service.";
-      if (!phone.trim()) return "Phone is required for SMS check-ins.";
-      if (!isValidE164(phone)) return "Phone must be in E.164 format (e.g. +15551234567).";
+      if (phone.trim() && !isValidE164(phone)) return "Phone must be in E.164 format (e.g. +15551234567) — or leave it blank to skip SMS.";
       const h = getHeightCm();
       if (h == null || h <= 0) return "Height is required.";
       const w = getWeightKg();
@@ -216,8 +215,8 @@ export function PatientOnboardingForm({
     const finalHeightCm = getHeightCm();
 
     const normalizedPhone = normalizePhone(phone);
-    if (!normalizedPhone) {
-      setError("Phone is required and must be in E.164 format (e.g. +15551234567).");
+    if (phone.trim() && !normalizedPhone) {
+      setError("Phone must be in E.164 format (e.g. +15551234567) — or clear it to skip SMS.");
       setSubmitting(false);
       return;
     }
@@ -228,7 +227,7 @@ export function PatientOnboardingForm({
         dateOfBirth: dateOfBirth || null,
         heightCm: finalHeightCm ?? undefined,
         weightKg: finalWeightKg,
-        phone: normalizedPhone,
+        phone: normalizedPhone ?? undefined,
         pcpName: pcpName.trim() || null,
         pcpCity: pcpCity.trim() || null,
         pcpState: pcpState.trim() || null,
@@ -369,7 +368,7 @@ export function PatientOnboardingForm({
 
             <div>
               <label htmlFor="phone" className={labelClass}>
-                Phone (for SMS check-ins) <span className="text-red-600">*</span>
+                Phone <span className="text-stone-400 font-normal">(optional — for SMS check-ins)</span>
               </label>
               <input
                 id="phone"
@@ -378,10 +377,9 @@ export function PatientOnboardingForm({
                 onChange={(e) => setPhone(e.target.value)}
                 className={inputClass}
                 placeholder="e.g. +15551234567"
-                required
               />
               <p className="text-xs text-stone-500 mt-1">
-                Include country code (e.g. +1 for US). We&apos;ll send symptom check-ins via SMS.
+                Include country code (e.g. +1 for US). Leave blank to skip SMS — you can add it later in settings.
               </p>
             </div>
 
