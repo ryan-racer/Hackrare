@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { submitOnboarding } from "@/app/(dashboard)/patient/onboarding/actions";
 
 type Medication = { name: string; dose?: string; frequency?: string };
 
@@ -198,27 +199,23 @@ export function PatientOnboardingForm({
     const finalHeightCm = getHeightCm();
 
     try {
-      const res = await fetch("/api/patient/onboarding", {
-        method: "PATCH",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim() || undefined,
-          dateOfBirth: dateOfBirth || null,
-          heightCm: finalHeightCm,
-          weightKg: finalWeightKg,
-          pcpName: pcpName.trim() || null,
-          pcpCity: pcpCity.trim() || null,
-          pcpState: pcpState.trim() || null,
-          currentDiagnoses: diagnoses,
-          currentMedications: meds,
-          allergies: allergies.trim() || null,
-        }),
+      const result = await submitOnboarding({
+        name: name.trim() || undefined,
+        dateOfBirth: dateOfBirth || null,
+        heightCm: finalHeightCm ?? undefined,
+        weightKg: finalWeightKg,
+        pcpName: pcpName.trim() || null,
+        pcpCity: pcpCity.trim() || null,
+        pcpState: pcpState.trim() || null,
+        currentDiagnoses: diagnoses,
+        currentMedications: meds,
+        allergies: allergies.trim() || null,
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Something went wrong");
+      if (!result.ok) {
+        setError(result.error);
+        setSubmitting(false);
+        return;
       }
       router.push("/patient");
       router.refresh();
