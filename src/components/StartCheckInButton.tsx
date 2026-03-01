@@ -1,3 +1,4 @@
+git add .
 "use client";
 
 import { useRouter } from "next/navigation";
