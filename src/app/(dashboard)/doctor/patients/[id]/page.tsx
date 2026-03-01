@@ -4,6 +4,9 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { TrendsCharts } from "@/components/TrendsCharts";
 import { AIInsightSection } from "@/components/AIInsightSection";
+import { EvidencePackSection } from "@/components/EvidencePackSection";
+import { DiagnosisSection } from "@/components/DiagnosisSection";
+import { AlertBanner } from "@/components/AlertBanner";
 
 export default async function DoctorPatientPage({
   params,
@@ -49,11 +52,29 @@ export default async function DoctorPatientPage({
       </h1>
       <p className="text-stone-500 text-sm mb-8">{link.patient.email}</p>
 
+      <AlertBanner patientId={patientId} />
+
       <TrendsCharts patientId={patientId} />
 
       <section className="mt-8 mb-8">
         <h2 className="font-semibold text-lg text-stone-900 mb-2">AI trend analysis</h2>
         <AIInsightSection patientId={patientId} initialInsights={insights} />
+      </section>
+
+      <section className="mt-8 mb-8">
+        <h2 className="font-semibold text-lg text-stone-900 mb-1">Diagnoses</h2>
+        <p className="text-sm text-stone-500 mb-4">
+          Add confirmed or working diagnoses to trigger Agent 4 disease-specific check-in templates.
+        </p>
+        <DiagnosisSection patientId={patientId} />
+      </section>
+
+      <section className="mt-8 mb-8">
+        <h2 className="font-semibold text-lg text-stone-900 mb-1">Evidence Pack</h2>
+        <p className="text-sm text-stone-500 mb-4">
+          Agent 3 · Maps longitudinal symptoms to HPO phenotypes and surfaces rare disease candidates for clinician discussion. Not a diagnosis.
+        </p>
+        <EvidencePackSection patientId={patientId} />
       </section>
 
       {generalChats.length > 0 && (

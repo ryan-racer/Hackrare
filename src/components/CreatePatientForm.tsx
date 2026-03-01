@@ -3,13 +3,20 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 
-type Result = { name: string; email: string; tempPassword?: string; linked?: boolean };
+type Result = {
+  name: string;
+  email: string;
+  linked?: boolean;
+  inviteUrl?: string;
+  emailSent?: boolean;
+};
 
 export function CreatePatientForm({ onCreated }: { onCreated?: () => void }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -32,6 +39,13 @@ export function CreatePatientForm({ onCreated }: { onCreated?: () => void }) {
     },
   });
 
+  function copyLink(url: string) {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   if (!open) {
     return (
       <button
@@ -47,24 +61,55 @@ export function CreatePatientForm({ onCreated }: { onCreated?: () => void }) {
     <div className="border border-stone-200 rounded-lg p-5 max-w-md bg-white">
       <h2 className="font-semibold text-stone-900 mb-3">Register new patient</h2>
       {result ? (
-        <div className="space-y-2 text-sm">
+        <div className="space-y-3 text-sm">
           <p className="text-green-700 font-medium">
             {result.linked ? "Existing patient linked." : "Patient account created."}
           </p>
-          <p className="text-stone-700"><span className="text-stone-500">Name:</span> {result.name}</p>
-          <p className="text-stone-700"><span className="text-stone-500">Email:</span> {result.email}</p>
-          {result.tempPassword && (
-            <p>
-              <span className="text-stone-500">Temp password:</span>{" "}
-              <code className="bg-stone-100 px-2 py-0.5 rounded font-mono text-stone-800">
-                {result.tempPassword}
-              </code>
-              <span className="text-stone-500 ml-2">(share this with the patient)</span>
-            </p>
-          )}
+          <p className="text-stone-700">
+            <span className="text-stone-500">Name:</span> {result.name}
+          </p>
+          <p className="text-stone-700">
+            <span className="text-stone-500">Email:</span> {result.email}
+          </p>
+
+          {result.emailSent ? (
+            <div className="flex items-start gap-2 bg-green-50 border border-green-100 rounded-lg px-3 py-2.5">
+              <span className="text-green-600 mt-0.5">✓</span>
+              <p className="text-green-700">
+                A password setup email has been sent to <strong>{result.email}</strong>.
+                The link expires in 7 days.
+              </p>
+            </div>
+          ) : result.inviteUrl ? (
+            <div className="space-y-2">
+              <div className="bg-amber-50 border border-amber-100 rounded-lg px-3 py-2.5">
+                <p className="text-amber-700 text-xs mb-1.5">
+                  Email invite not configured — share this login link with the patient manually:
+                </p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-xs bg-white border border-amber-200 rounded px-2 py-1 text-stone-700 truncate">
+                    {result.inviteUrl}
+                  </code>
+                  <button
+                    onClick={() => copyLink(result.inviteUrl!)}
+                    className="shrink-0 text-xs px-2.5 py-1 rounded border border-amber-300 bg-white text-amber-700 hover:bg-amber-50 transition-colors"
+                  >
+                    {copied ? "Copied!" : "Copy"}
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-stone-400">
+                To enable automatic invite emails, add a Management API M2M app in your Auth0 dashboard and set{" "}
+                <code className="bg-stone-100 px-1 rounded">AUTH0_MANAGEMENT_CLIENT_ID</code> /{" "}
+                <code className="bg-stone-100 px-1 rounded">AUTH0_MANAGEMENT_CLIENT_SECRET</code> in{" "}
+                <code className="bg-stone-100 px-1 rounded">.env</code>.
+              </p>
+            </div>
+          ) : null}
+
           <button
-            onClick={() => { setResult(null); setOpen(false); }}
-            className="mt-2 px-4 py-2 rounded-lg bg-stone-900 text-stone-50 font-medium hover:bg-stone-800 text-sm transition-colors"
+            onClick={() => { setResult(null); setOpen(false); setCopied(false); }}
+            className="mt-1 px-4 py-2 rounded-lg bg-stone-900 text-stone-50 font-medium hover:bg-stone-800 text-sm transition-colors"
           >
             Done
           </button>
@@ -95,6 +140,9 @@ export function CreatePatientForm({ onCreated }: { onCreated?: () => void }) {
               placeholder="patient@example.com"
             />
           </div>
+          <p className="text-xs text-stone-400">
+            An invite email will be sent to the patient to set up their password.
+          </p>
           {mutation.error && (
             <p className="text-red-600 text-sm">{(mutation.error as Error).message}</p>
           )}

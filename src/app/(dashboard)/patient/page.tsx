@@ -1,6 +1,7 @@
 import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { PatientTabs } from "@/components/PatientTabs";
+import { AlertBanner } from "@/components/AlertBanner";
 
 export default async function PatientDashboardPage({
   searchParams,
@@ -38,6 +39,7 @@ export default async function PatientDashboardPage({
   return (
     <div className="max-w-7xl mx-auto">
       <h1 className="text-3xl font-semibold tracking-tight text-stone-900 mb-8">My Health</h1>
+      <AlertBanner patientId={userId} />
       <PatientTabs
         activeTab={activeTab}
         checkIns={checkIns.map((c: { id: string; scheduledAt: Date; status: string; template: { id: string; name: string }; summary: { medicalSummary: string } | null }) => ({

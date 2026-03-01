@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { assignDefaultJournalToPatient } from "@/lib/journal/assign-default";
+import {
+  createAuth0User,
+  sendPasswordSetupEmail,
+  managementApiConfigured,
+} from "@/lib/auth0-management";
 import { z } from "zod";
 
 const schema = z.object({
@@ -59,9 +64,29 @@ export async function POST(req: Request) {
     console.error("Failed to assign default journal to new patient:", e);
   }
 
+  // Create Auth0 user + send password-setup email if Management API is configured
+  let inviteUrl: string | null = null;
+  let emailSent = false;
+  if (managementApiConfigured()) {
+    try {
+      const auth0UserId = await createAuth0User(email, name);
+      inviteUrl = await sendPasswordSetupEmail(auth0UserId);
+      emailSent = true;
+    } catch (e) {
+      console.error("Auth0 invite error (non-fatal):", e);
+      // Fall through — return the fallback login URL instead
+      inviteUrl = `${process.env.APP_BASE_URL ?? "http://localhost:3000"}/auth/login`;
+    }
+  } else {
+    // No M2M creds — give doctor the login link to share manually
+    inviteUrl = `${process.env.APP_BASE_URL ?? "http://localhost:3000"}/auth/login`;
+  }
+
   return NextResponse.json({
     id: patient.id,
     email: patient.email,
     name: patient.name,
+    inviteUrl,
+    emailSent,
   });
 }
