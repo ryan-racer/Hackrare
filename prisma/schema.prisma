@@ -37,8 +37,11 @@ model User {
   doctorLinks    PatientDoctor[] @relation("Doctor")
   checkIns       CheckIn[]       @relation("PatientCheckIns")
   journalAssignments JournalAssignment[]
-  aiInsights     AIInsight[]
-  generalChats   GeneralChat[]
+  aiInsights       AIInsight[]
+  generalChats     GeneralChat[]
+  diagnoses        Diagnosis[]
+  clinicianReports ClinicianReport[]
+  alerts           Alert[]
 }
 
 model AIInsight {
@@ -191,4 +194,59 @@ model GeneralChatMessage {
   createdAt DateTime @default(now())
 
   chat GeneralChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+// ── Agent 3: Rare Disease Evidence Pack ──────────────────────────────────────
+
+model Diagnosis {
+  id           String   @id @default(cuid())
+  patientId    String
+  diseaseLabel String   // human-readable name
+  diseaseId    String?  // e.g. ORPHA:123 or GARD:0001234
+  confirmed    Boolean  @default(false)
+  working      Boolean  @default(true)  // "working diagnosis"
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  patient           User               @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  checkinTemplates  CheckinTemplate[]
+}
+
+model ClinicianReport {
+  id                String   @id @default(cuid())
+  patientId         String
+  generatedAt       DateTime @default(now())
+  periodStart       DateTime
+  periodEnd         DateTime
+  reportMd          String   // full markdown evidence pack
+  hpoTerms          String   // JSON: [{label, hpoId?, verified}]
+  candidateConditions String  // JSON: [{name, orphaCode?, matchedTerms, discriminators, references}]
+  checkinsUsed      Int      @default(0)
+
+  patient User @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+model Alert {
+  id        String   @id @default(cuid())
+  patientId String
+  severity  String   // "info" | "watch" | "urgent"
+  title     String
+  message   String
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  patient User @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+// ── Agent 4: Disease-Specific Templates ──────────────────────────────────────
+
+model CheckinTemplate {
+  id           String   @id @default(cuid())
+  diagnosisId  String
+  templateJson String   // renderable form definition JSON
+  cadence      String   @default("daily") // "daily" | "weekly" | "flare"
+  createdAt    DateTime @default(now())
+
+  diagnosis Diagnosis @relation(fields: [diagnosisId], references: [id], onDelete: Cascade)
 }
