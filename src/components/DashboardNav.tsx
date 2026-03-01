@@ -19,20 +19,23 @@ export function DashboardNav({ role }: { role?: string }) {
   }
 
   const patientTabs = [
-    { key: "home", label: "Home" },
-    { key: "journal", label: "Journal" },
+    { key: "home", label: "Home", href: "/patient" },
+    { key: "checkins", label: "Check-ins", href: "/patient?tab=checkins" },
+    { key: "chat", label: "Chat", href: "/patient?tab=chat" },
+    { key: "journal", label: "Journal", href: "/patient?tab=journal" },
   ];
 
   const isPatientPage = pathname === "/patient";
+  const activeKey = isPatientPage ? (tab === "checkins" || tab === "chat" || tab === "journal" ? tab : "home") : "";
 
   return (
     <nav className="w-52 border-r border-stone-200 bg-white p-6 flex flex-col gap-1">
       {patientTabs.map((t) => (
         <Link
           key={t.key}
-          href={t.key === "home" ? "/patient" : "/patient?tab=journal"}
+          href={t.href}
           className={`text-sm px-3 py-2.5 rounded-lg transition-colors ${
-            isPatientPage && tab === t.key
+            activeKey === t.key
               ? "bg-stone-100 font-semibold text-stone-900"
               : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
           }`}

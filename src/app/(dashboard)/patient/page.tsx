@@ -13,7 +13,7 @@ export default async function PatientDashboardPage({
   if (!userId) return null;
 
   const { tab } = await searchParams;
-  const activeTab = tab === "journal" ? "journal" : "home";
+  const activeTab = tab === "checkins" ? "checkins" : tab === "chat" ? "chat" : tab === "journal" ? "journal" : "home";
 
   const [user, recentExtractions, checkIns, assignments] = await Promise.all([
     prisma.user.findUnique({
@@ -84,6 +84,7 @@ export default async function PatientDashboardPage({
           templateName: a.template.name,
         }))}
       />
+
     </div>
   );
 }
