@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionWithUser } from "@/lib/auth0";
 import { redirect } from "next/navigation";
 
 export default async function HomePage() {
-  const session = await getServerSession(authOptions);
-  if (session?.user) {
-    const role = (session.user as { role?: string }).role;
-    if (role === "doctor") redirect("/doctor");
+  const sessionWithUser = await getSessionWithUser();
+  if (sessionWithUser) {
+    if (sessionWithUser.user.role === "doctor") redirect("/doctor");
     redirect("/patient");
   }
   return (
@@ -18,16 +16,16 @@ export default async function HomePage() {
       </p>
       <div className="flex gap-4">
         <Link
-          href="/login"
+          href="/auth/login"
           className="px-4 py-2 rounded-lg bg-neutral-800 text-white hover:bg-neutral-700"
         >
           Log in
         </Link>
         <Link
-          href="/register"
+          href="/auth/login?screen_hint=signup"
           className="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800"
         >
-          Register
+          Sign up
         </Link>
       </div>
     </div>

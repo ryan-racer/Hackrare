@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { CreatePatientForm } from "@/components/CreatePatientForm";
 
 export default async function DoctorDashboardPage() {
-  const session = await getServerSession(authOptions);
-  const doctorId = (session?.user as { id?: string })?.id;
+  const sessionWithUser = await getSessionWithUser();
+  const doctorId = sessionWithUser?.user.id;
   if (!doctorId) return null;
 
   const links = await prisma.patientDoctor.findMany({

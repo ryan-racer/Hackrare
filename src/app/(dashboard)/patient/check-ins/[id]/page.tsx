@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionWithUser } from "@/lib/auth0";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
@@ -10,8 +9,8 @@ export default async function PatientCheckInDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await getServerSession(authOptions);
-  const userId = (session?.user as { id?: string })?.id;
+  const sessionWithUser = await getSessionWithUser();
+  const userId = sessionWithUser?.user.id;
   if (!userId) return null;
 
   const { id } = await params;

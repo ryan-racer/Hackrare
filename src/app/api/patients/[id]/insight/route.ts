@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { generateTrendAnalysis } from "@/lib/llm/trend-analysis";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const doctorId = (session.user as { id?: string }).id;
+  const sessionWithUser = await getSessionWithUser(req);
+  if (!sessionWithUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const doctorId = sessionWithUser.user.id;
   const { id: patientId } = await params;
 
   const link = await prisma.patientDoctor.findUnique({
-    where: { patientId_doctorId: { patientId, doctorId: doctorId! } },
+    where: { patientId_doctorId: { patientId, doctorId } },
   });
   if (!link) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -27,16 +26,16 @@ export async function GET(
 }
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const doctorId = (session.user as { id?: string }).id;
+  const sessionWithUser = await getSessionWithUser(req);
+  if (!sessionWithUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const doctorId = sessionWithUser.user.id;
   const { id: patientId } = await params;
 
   const link = await prisma.patientDoctor.findUnique({
-    where: { patientId_doctorId: { patientId, doctorId: doctorId! } },
+    where: { patientId_doctorId: { patientId, doctorId } },
   });
   if (!link) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 

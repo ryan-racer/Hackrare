@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions, hashPasswordForRegister } from "@/lib/auth";
+import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 
@@ -9,18 +8,10 @@ const schema = z.object({
   name: z.string().min(1),
 });
 
-// Generates a readable temporary password
-function generateTempPassword(): string {
-  const words = ["Sun", "Oak", "Bay", "Elm", "Fox", "Ivy"];
-  const word = words[Math.floor(Math.random() * words.length)];
-  const num = Math.floor(1000 + Math.random() * 9000);
-  return `${word}${num}`;
-}
-
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  const doctorId = (session?.user as { id?: string })?.id;
-  const role = (session?.user as { role?: string })?.role;
+  const sessionWithUser = await getSessionWithUser(req);
+  const doctorId = sessionWithUser?.user.id;
+  const role = sessionWithUser?.user.role;
 
   if (!doctorId || role !== "doctor") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -52,11 +43,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ id: existing.id, email: existing.email, name: existing.name, linked: true });
   }
 
-  const tempPassword = generateTempPassword();
-  const passwordHash = await hashPasswordForRegister(tempPassword);
-
+  // Create patient; they will sign in via Auth0 (no local password)
   const patient = await prisma.user.create({
-    data: { email, name, passwordHash, role: "patient" },
+    data: { email, name, role: "patient" },
   });
 
   await prisma.patientDoctor.create({
@@ -67,6 +56,5 @@ export async function POST(req: Request) {
     id: patient.id,
     email: patient.email,
     name: patient.name,
-    tempPassword,
   });
 }

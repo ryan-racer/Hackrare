@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { getNextQuestion, isFlowComplete, parseAnswer } from "@/lib/journal/flow-engine";
 import type { QuestionFlowDef } from "@/lib/journal-types";
 import { generateMedicalSummary } from "@/lib/llm/summarize";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const sessionWithUser = await getSessionWithUser(req);
+  if (!sessionWithUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id: checkInId } = await params;
 
   const checkIn = await prisma.checkIn.findUnique({
@@ -20,11 +19,11 @@ export async function GET(
   });
   if (!checkIn) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const userId = (session.user as { id?: string }).id;
-  const role = (session.user as { role?: string }).role;
+  const userId = sessionWithUser.user.id;
+  const role = sessionWithUser.user.role;
   if (checkIn.patientId !== userId && role !== "doctor") {
     const link = await prisma.patientDoctor.findUnique({
-      where: { patientId_doctorId: { patientId: checkIn.patientId, doctorId: userId! } },
+      where: { patientId_doctorId: { patientId: checkIn.patientId, doctorId: userId } },
     });
     if (!link) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -40,11 +39,11 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const sessionWithUser = await getSessionWithUser(req);
+  if (!sessionWithUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id: checkInId } = await params;
-  const userId = (session.user as { id?: string }).id;
-  const role = (session.user as { role?: string }).role;
+  const userId = sessionWithUser.user.id;
+  const role = sessionWithUser.user.role;
 
   const checkIn = await prisma.checkIn.findUnique({
     where: { id: checkInId },

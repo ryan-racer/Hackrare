@@ -1,22 +1,21 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { generalChatReply } from "@/lib/llm/general-chat";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  const userId = (session?.user as { id?: string })?.id;
+  const sessionWithUser = await getSessionWithUser(req);
+  const userId = sessionWithUser?.user.id;
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: chatId } = await params;
   const chat = await prisma.generalChat.findUnique({ where: { id: chatId } });
   if (!chat) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const role = (session?.user as { role?: string })?.role;
+  const role = sessionWithUser.user.role;
   if (chat.patientId !== userId && role !== "doctor") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -34,8 +33,8 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  const userId = (session?.user as { id?: string })?.id;
+  const sessionWithUser = await getSessionWithUser(req);
+  const userId = sessionWithUser?.user.id;
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: chatId } = await params;

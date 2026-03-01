@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const sessionWithUser = await getSessionWithUser(req);
+  if (!sessionWithUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const userId = (session.user as { id?: string }).id;
-  const role = (session.user as { role?: string }).role;
+  const userId = sessionWithUser.user.id;
+  const role = sessionWithUser.user.role;
   const { searchParams } = new URL(req.url);
   const patientIdParam = searchParams.get("patientId");
 
   if (role === "patient") {
     const checkIns = await prisma.checkIn.findMany({
-      where: { patientId: userId! },
+      where: { patientId: userId },
       orderBy: { scheduledAt: "desc" },
       include: {
         template: { select: { id: true, name: true } },
@@ -27,7 +26,7 @@ export async function GET(req: Request) {
 
   if (role === "doctor") {
     const linked = await prisma.patientDoctor.findMany({
-      where: { doctorId: userId! },
+      where: { doctorId: userId },
       select: { patientId: true },
     });
     const patientIds = linked.map((l) => l.patientId);
@@ -54,12 +53,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const sessionWithUser = await getSessionWithUser(req);
+  if (!sessionWithUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const userId = (session.user as { id?: string }).id;
-  const role = (session.user as { role?: string }).role;
+  const userId = sessionWithUser.user.id;
+  const role = sessionWithUser.user.role;
   let patientId: string;
 
   const body = await req.json().catch(() => ({}));
