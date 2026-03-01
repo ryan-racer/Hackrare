@@ -27,7 +27,7 @@ Full-stack app for patients to track symptoms via an LLM-assisted chatbot. Docto
      - `AUTH0_CLIENT_SECRET`
      - `AUTH0_SECRET` (64 chars, e.g. `openssl rand -hex 32`)
      - `APP_BASE_URL` (e.g. `http://localhost:3000`)
-   - **Auth0 app settings:** Allowed Callback URLs = `http://localhost:3000/auth/callback`, Allowed Logout URLs = `http://localhost:3000`
+   - **Auth0 app settings:** Allowed Callback URLs = `http://localhost:3000/auth/callback`, `http://localhost:3000/api/auth/complete-provider-signup` (for provider sign-up), Allowed Logout URLs = `http://localhost:3000`
    - **Optional:** `OPENAI_API_KEY`, `CRON_SECRET` (for cron endpoint)
 
 3. **Database**
@@ -65,13 +65,14 @@ The seed links the patient to the doctor and assigns the Migraine journal templa
    - `APP_BASE_URL` = your Render URL (e.g. `https://hackrare.onrender.com`)
    - `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET` from your Auth0 application
 
-   In Auth0, set **Allowed Callback URLs** and **Allowed Logout URLs** to your Render URL (e.g. `https://hackrare.onrender.com/auth/callback`, `https://hackrare.onrender.com`).
+   In Auth0, set **Allowed Callback URLs** (include `.../auth/callback` and `.../api/auth/complete-provider-signup` for provider sign-up) and **Allowed Logout URLs** to your Render URL (e.g. `https://hackrare.onrender.com/auth/callback`, `https://hackrare.onrender.com/api/auth/complete-provider-signup`, `https://hackrare.onrender.com`).
 
 3. **Optional:** `OPENAI_API_KEY`, `CRON_SECRET` (generate a secret for the cron endpoint).
+4. **WhatsApp:** To enable the WhatsApp bot (symptom check-ins and chat), see [docs/WHATSAPP_SETUP.md](docs/WHATSAPP_SETUP.md). You’ll need Twilio and env vars `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`.
 
 ## Features
 
-- **Patient:** Start check-ins (manual or via cron), answer symptom questions in chat, view/edit raw data, see generated summary.
+- **Patient:** Start check-ins (manual or via cron), answer symptom questions in chat (web or WhatsApp), view/edit raw data, see generated summary. Phone number is required at onboarding for WhatsApp check-ins.
 - **Doctor:** View patients and their check-ins with medical summaries, trends (e.g. headache count by week), and AI trend analysis.
 - **Cron:** Call `GET /api/cron/run-check-ins` daily (e.g. 9am) with `Authorization: Bearer <CRON_SECRET>` to create new check-ins for assigned journals.
 

@@ -34,6 +34,19 @@ function isAtLeast18(dateOfBirthStr: string): boolean {
   return age >= 18;
 }
 
+/** E.164 format: + followed by 1-15 digits (e.g. +15551234567) */
+function isValidE164(phone: string): boolean {
+  if (!phone.trim()) return false;
+  return /^\+[1-9]\d{6,14}$/.test(phone.trim());
+}
+
+function normalizePhone(phone: string): string | null {
+  const trimmed = phone.trim().replace(/\s/g, "");
+  if (!trimmed) return null;
+  if (!isValidE164(trimmed)) return null;
+  return trimmed;
+}
+
 type Props = {
   initialName?: string | null;
 };
@@ -63,6 +76,7 @@ export function PatientOnboardingForm({
     { name: "", dose: "", frequency: "" },
   ]);
   const [allergies, setAllergies] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -125,6 +139,7 @@ export function PatientOnboardingForm({
       if (!name.trim()) return false;
       if (!dateOfBirth.trim()) return false;
       if (!isAtLeast18(dateOfBirth)) return false;
+      if (!isValidE164(phone)) return false;
       const h = getHeightCm();
       if (h == null || h <= 0) return false;
       const w = getWeightKg();
@@ -146,6 +161,8 @@ export function PatientOnboardingForm({
       if (!name.trim()) return "Name is required.";
       if (!dateOfBirth.trim()) return "Date of birth is required.";
       if (!isAtLeast18(dateOfBirth)) return "You must be 18 or older to use this service.";
+      if (!phone.trim()) return "Phone is required for WhatsApp check-ins.";
+      if (!isValidE164(phone)) return "Phone must be in E.164 format (e.g. +15551234567).";
       const h = getHeightCm();
       if (h == null || h <= 0) return "Height is required.";
       const w = getWeightKg();
@@ -198,12 +215,20 @@ export function PatientOnboardingForm({
 
     const finalHeightCm = getHeightCm();
 
+    const normalizedPhone = normalizePhone(phone);
+    if (!normalizedPhone) {
+      setError("Phone is required and must be in E.164 format (e.g. +15551234567).");
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const result = await submitOnboarding({
         name: name.trim() || undefined,
         dateOfBirth: dateOfBirth || null,
         heightCm: finalHeightCm ?? undefined,
         weightKg: finalWeightKg,
+        phone: normalizedPhone,
         pcpName: pcpName.trim() || null,
         pcpCity: pcpCity.trim() || null,
         pcpState: pcpState.trim() || null,
@@ -340,6 +365,24 @@ export function PatientOnboardingForm({
                   />
                 </div>
               )}
+            </div>
+
+            <div>
+              <label htmlFor="phone" className={labelClass}>
+                Phone (for WhatsApp check-ins) <span className="text-red-600">*</span>
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={inputClass}
+                placeholder="e.g. +15551234567"
+                required
+              />
+              <p className="text-xs text-stone-500 mt-1">
+                Include country code (e.g. +1 for US). We&apos;ll send symptom check-ins via WhatsApp.
+              </p>
             </div>
 
             <div>

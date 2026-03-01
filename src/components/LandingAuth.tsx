@@ -8,6 +8,7 @@ export function LandingAuth() {
   const [role, setRole] = useState<Role>("patient");
 
   const loginHref = role === "patient" ? "/login/patient" : "/login/provider";
+  const signupHref = role === "patient" ? "/auth/login?screen_hint=signup" : "/auth/login?returnTo=/api/auth/complete-provider-signup&screen_hint=signup";
 
   return (
     <div className="mt-12 space-y-6">
@@ -39,7 +40,7 @@ export function LandingAuth() {
           Log in
         </a>
         <a
-          href="/auth/login?screen_hint=signup"
+          href={signupHref}
           className="inline-flex items-center justify-center px-8 py-3.5 text-center font-medium bg-white text-stone-800 border border-stone-300 rounded-lg hover:bg-stone-50 hover:border-stone-400 transition-colors"
         >
           Sign up

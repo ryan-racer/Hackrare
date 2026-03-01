@@ -11,5 +11,5 @@ export default async function ProviderLoginPage() {
     if (sessionWithUser.user.role === "doctor") redirect("/doctor");
     redirect("/patient");
   }
-  redirect("/auth/login");
+  redirect("/auth/login?returnTo=/api/auth/complete-provider-signup");
 }
