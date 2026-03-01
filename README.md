@@ -68,11 +68,11 @@ The seed links the patient to the doctor and assigns the Migraine journal templa
    In Auth0, set **Allowed Callback URLs** (include `.../auth/callback` and `.../api/auth/complete-provider-signup` for provider sign-up) and **Allowed Logout URLs** to your Render URL (e.g. `https://hackrare.onrender.com/auth/callback`, `https://hackrare.onrender.com/api/auth/complete-provider-signup`, `https://hackrare.onrender.com`).
 
 3. **Optional:** `OPENAI_API_KEY`, `CRON_SECRET` (generate a secret for the cron endpoint).
-4. **WhatsApp:** To enable the WhatsApp bot (symptom check-ins and chat), see [docs/WHATSAPP_SETUP.md](docs/WHATSAPP_SETUP.md). You’ll need Twilio and env vars `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`.
+4. **SMS:** To enable the SMS bot (symptom check-ins and chat), see [docs/SMS_SETUP.md](docs/SMS_SETUP.md). You’ll need Twilio and env vars `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_TEXT_FROM`.
 
 ## Features
 
-- **Patient:** Start check-ins (manual or via cron), answer symptom questions in chat (web or WhatsApp), view/edit raw data, see generated summary. Phone number is required at onboarding for WhatsApp check-ins.
+- **Patient:** Start check-ins (manual or via cron), answer symptom questions in chat (web or SMS), view/edit raw data, see generated summary. Phone number is required at onboarding for SMS check-ins.
 - **Doctor:** View patients and their check-ins with medical summaries, trends (e.g. headache count by week), and AI trend analysis.
 - **Cron:** Call `GET /api/cron/run-check-ins` daily (e.g. 9am) with `Authorization: Bearer <CRON_SECRET>` to create new check-ins for assigned journals.
 

@@ -2,22 +2,67 @@ import { NextRequest, NextResponse } from "next/server";
 import twilio from "twilio";
 import { prisma } from "@/lib/db";
 import { generalChatReply } from "@/lib/llm/general-chat";
+import { processCheckInReply } from "@/lib/check-in/process-reply";
 
 const MessagingResponse = twilio.twiml.MessagingResponse;
 
+function twimlResponse(message: string): NextResponse {
+  const twiml = new MessagingResponse();
+  twiml.message(message);
+  return new NextResponse(twiml.toString(), {
+    headers: { "Content-Type": "text/xml" },
+  });
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.formData();
-  const from = body.get("From") as string;
+  const from = (body.get("From") as string)?.trim() ?? "";
   const content = (body.get("Body") as string)?.trim();
-
-  const twiml = new MessagingResponse();
 
   const patient = await prisma.user.findUnique({ where: { phone: from } });
   if (!patient) {
-    twiml.message("Sorry, we couldn't find an account linked to this number. Please register on the app.");
-    return new NextResponse(twiml.toString(), { headers: { "Content-Type": "text/xml" } });
+    return twimlResponse(
+      "Sorry, we couldn't find an account linked to this number. Please register on the app."
+    );
   }
 
+  const trimmedContent = content ?? "";
+  if (!trimmedContent) {
+    return twimlResponse("Please send a message.");
+  }
+
+  // Route: check-in if patient has in-progress check-in with last message from assistant
+  const inProgressCheckIn = await prisma.checkIn.findFirst({
+    where: {
+      patientId: patient.id,
+      status: "in_progress",
+    },
+    include: {
+      messages: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+
+  const lastMessage = inProgressCheckIn?.messages[0];
+  const isWaitingForCheckInReply =
+    lastMessage?.role === "assistant" && inProgressCheckIn;
+
+  if (isWaitingForCheckInReply && inProgressCheckIn) {
+    const result = await processCheckInReply(
+      patient.id,
+      inProgressCheckIn.id,
+      trimmedContent
+    );
+    if (!result.ok) {
+      return twimlResponse(result.error);
+    }
+    return twimlResponse(result.reply);
+  }
+
+  // General chat path
   let chat = await prisma.generalChat.findFirst({
     where: { patientId: patient.id },
     orderBy: { updatedAt: "desc" },
@@ -44,12 +89,12 @@ export async function POST(req: NextRequest) {
   });
 
   await prisma.generalChatMessage.create({
-    data: { chatId: chat.id, role: "user", content },
+    data: { chatId: chat.id, role: "user", content: trimmedContent },
   });
 
   const { reply, extractedData } = await generalChatReply(
     history.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
-    content
+    trimmedContent
   );
 
   await prisma.generalChatMessage.create({
@@ -71,6 +116,5 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  twiml.message(reply);
-  return new NextResponse(twiml.toString(), { headers: { "Content-Type": "text/xml" } });
+  return twimlResponse(reply);
 }

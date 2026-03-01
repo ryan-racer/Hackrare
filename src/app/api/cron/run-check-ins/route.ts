@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { sendWhatsAppMessage } from "@/lib/whatsapp/send";
+import { sendSmsMessage } from "@/lib/sms/send";
 
 /**
  * Cron endpoint: create check-ins for patients with active journal assignments.
@@ -60,9 +60,9 @@ export async function GET(req: Request) {
 
     if (a.patient.phone) {
       try {
-        await sendWhatsAppMessage(a.patient.phone, firstQuestion.prompt);
+        await sendSmsMessage(a.patient.phone, firstQuestion.prompt);
       } catch (e) {
-        console.error("WhatsApp send failed for check-in:", checkIn.id, e);
+        console.error("SMS send failed for check-in:", checkIn.id, e);
       }
     }
 

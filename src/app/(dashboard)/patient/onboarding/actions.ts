@@ -2,7 +2,7 @@
 
 import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
-import { sendWhatsAppMessage } from "@/lib/whatsapp/send";
+import { sendSmsMessage } from "@/lib/sms/send";
 import { z } from "zod";
 
 const E164_REGEX = /^\+[1-9]\d{6,14}$/;
@@ -14,7 +14,7 @@ const bodySchema = z.object({
   weightKg: z.number().positive(),
   phone: z
     .string()
-    .min(1, "Phone is required for WhatsApp check-ins.")
+    .min(1, "Phone is required for SMS check-ins.")
     .refine((v) => E164_REGEX.test(v.trim()), "Phone must be E.164 format (e.g. +15551234567)"),
   pcpName: z.string().optional().nullable(),
   pcpCity: z.string().optional().nullable(),
@@ -99,12 +99,12 @@ export async function submitOnboarding(
   });
 
   try {
-    await sendWhatsAppMessage(
+    await sendSmsMessage(
       normalizedPhone,
       "Hi! You're signed up for symptom tracking. We'll check in with you about your symptoms. Reply anytime to log how you're feeling."
     );
   } catch (e) {
-    console.error("WhatsApp welcome message failed:", e);
+    console.error("SMS welcome message failed:", e);
   }
 
   return { ok: true };

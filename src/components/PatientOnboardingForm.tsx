@@ -161,7 +161,7 @@ export function PatientOnboardingForm({
       if (!name.trim()) return "Name is required.";
       if (!dateOfBirth.trim()) return "Date of birth is required.";
       if (!isAtLeast18(dateOfBirth)) return "You must be 18 or older to use this service.";
-      if (!phone.trim()) return "Phone is required for WhatsApp check-ins.";
+      if (!phone.trim()) return "Phone is required for SMS check-ins.";
       if (!isValidE164(phone)) return "Phone must be in E.164 format (e.g. +15551234567).";
       const h = getHeightCm();
       if (h == null || h <= 0) return "Height is required.";
@@ -369,7 +369,7 @@ export function PatientOnboardingForm({
 
             <div>
               <label htmlFor="phone" className={labelClass}>
-                Phone (for WhatsApp check-ins) <span className="text-red-600">*</span>
+                Phone (for SMS check-ins) <span className="text-red-600">*</span>
               </label>
               <input
                 id="phone"
@@ -381,7 +381,7 @@ export function PatientOnboardingForm({
                 required
               />
               <p className="text-xs text-stone-500 mt-1">
-                Include country code (e.g. +1 for US). We&apos;ll send symptom check-ins via WhatsApp.
+                Include country code (e.g. +1 for US). We&apos;ll send symptom check-ins via SMS.
               </p>
             </div>
 
