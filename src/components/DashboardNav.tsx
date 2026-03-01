@@ -6,7 +6,7 @@ import { useSearchParams, usePathname } from "next/navigation";
 export function DashboardNav({ role }: { role?: string }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const tab = searchParams.get("tab") ?? "chat";
+  const tab = searchParams.get("tab") ?? "home";
 
   if (role === "doctor") {
     return (
@@ -19,9 +19,8 @@ export function DashboardNav({ role }: { role?: string }) {
   }
 
   const patientTabs = [
-    { key: "chat", label: "Chat with AI" },
-    { key: "symptoms", label: "Symptoms logged" },
-    { key: "checkins", label: "Check-ins" },
+    { key: "home", label: "Home" },
+    { key: "journal", label: "Journal" },
   ];
 
   const isPatientPage = pathname === "/patient";
@@ -31,7 +30,7 @@ export function DashboardNav({ role }: { role?: string }) {
       {patientTabs.map((t) => (
         <Link
           key={t.key}
-          href={`/patient?tab=${t.key}`}
+          href={t.key === "home" ? "/patient" : "/patient?tab=journal"}
           className={`text-sm px-3 py-2.5 rounded-lg transition-colors ${
             isPatientPage && tab === t.key
               ? "bg-stone-100 font-semibold text-stone-900"

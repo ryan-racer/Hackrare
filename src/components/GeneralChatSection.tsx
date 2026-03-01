@@ -42,8 +42,8 @@ function ChatUI({ chatId }: { chatId: string }) {
   if (isLoading) return <p className="text-stone-500 text-sm">Loading…</p>;
 
   return (
-    <div className="flex flex-col min-w-[720px]">
-      <div className="border border-stone-200 rounded-t-lg p-4 min-h-[600px] max-h-[65vh] overflow-y-auto space-y-3 bg-white">
+    <div className="flex flex-col min-w-0 w-full">
+      <div className="border border-stone-200 rounded-t-lg p-4 min-h-[400px] max-h-[60vh] overflow-y-auto space-y-3 bg-white">
         {messages?.map((m) => (
           <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
@@ -157,7 +157,7 @@ export function GeneralChatSection() {
           )}
 
           {/* Chat area */}
-          <div className="flex-1 min-w-[860px]">
+          <div className="flex-1 min-w-0">
             {activeChatId ? (
               <ChatUI chatId={activeChatId} />
             ) : (

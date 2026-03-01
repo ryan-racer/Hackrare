@@ -13,20 +13,21 @@ export default async function PatientDashboardPage({
   if (!userId) return null;
 
   const { tab } = await searchParams;
-  const activeTab = (tab === "symptoms" || tab === "checkins" ? tab : "chat") as "chat" | "symptoms" | "checkins";
+  const activeTab = tab === "journal" ? "journal" : "home";
 
-  const [checkIns, assignments, recentExtractions] = await Promise.all([
-    prisma.checkIn.findMany({
-      where: { patientId: userId },
-      orderBy: { scheduledAt: "desc" },
-      include: {
-        template: { select: { id: true, name: true } },
-        summary: true,
+  const [user, recentExtractions] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        name: true,
+        email: true,
+        pcpName: true,
+        pcpCity: true,
+        pcpState: true,
+        currentDiagnoses: true,
+        currentMedications: true,
+        allergies: true,
       },
-    }),
-    prisma.journalAssignment.findMany({
-      where: { patientId: userId, active: true },
-      include: { template: true },
     }),
     prisma.generalChat.findMany({
       where: { patientId: userId, NOT: { extractedData: null } },
@@ -36,21 +37,21 @@ export default async function PatientDashboardPage({
     }),
   ]);
 
+  if (!user) return null;
+
   return (
-    <div className="max-w-7xl mx-auto">
-      <h1 className="text-3xl font-semibold tracking-tight text-stone-900 mb-8">My Health</h1>
+    <div className="max-w-7xl mx-auto w-full h-full flex flex-col">
+      <h1 className="text-2xl font-semibold tracking-tight text-stone-900 mb-6 shrink-0">
+        My Health
+      </h1>
       <AlertBanner patientId={userId} />
       <PatientTabs
         activeTab={activeTab}
-        checkIns={checkIns.map((c: { id: string; scheduledAt: Date; status: string; template: { id: string; name: string }; summary: { medicalSummary: string } | null }) => ({
-          ...c,
-          scheduledAt: c.scheduledAt.toISOString(),
-        }))}
+        user={user}
         recentExtractions={recentExtractions.map((c: { id: string; title: string | null; createdAt: Date; extractedData: string | null }) => ({
           ...c,
           createdAt: c.createdAt.toISOString(),
         }))}
-        templateId={assignments[0]?.template.id}
       />
     </div>
   );
