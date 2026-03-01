@@ -16,18 +16,18 @@ export default async function LoginPage() {
           Sign in with your account to continue.
         </p>
         <div className="flex flex-col gap-3">
-          <Link
+          <a
             href="/auth/login"
             className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white hover:bg-neutral-700 text-center"
           >
             Log in
-          </Link>
-          <Link
+          </a>
+          <a
             href="/auth/login?screen_hint=signup"
             className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-center"
           >
             Sign up
-          </Link>
+          </a>
         </div>
         <Link href="/" className="text-sm text-neutral-600 dark:text-neutral-400 hover:underline">
           Back to home

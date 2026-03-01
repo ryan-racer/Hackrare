@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getSessionWithUser } from "@/lib/auth0";
 import { redirect } from "next/navigation";
 
@@ -15,18 +14,18 @@ export default async function HomePage() {
         Track your symptoms with AI-assisted journaling. Your doctor gets clear, precise summaries.
       </p>
       <div className="flex gap-4">
-        <Link
+        <a
           href="/auth/login"
           className="px-4 py-2 rounded-lg bg-neutral-800 text-white hover:bg-neutral-700"
         >
           Log in
-        </Link>
-        <Link
+        </a>
+        <a
           href="/auth/login?screen_hint=signup"
           className="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800"
         >
           Sign up
-        </Link>
+        </a>
       </div>
     </div>
   );

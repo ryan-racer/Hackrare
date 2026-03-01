@@ -15,12 +15,12 @@ export default async function RegisterPage() {
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           Sign up with Auth0 to create your account.
         </p>
-        <Link
+        <a
           href="/auth/login?screen_hint=signup"
           className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white hover:bg-neutral-700 text-center"
         >
           Sign up
-        </Link>
+        </a>
         <Link href="/login" className="text-sm text-neutral-600 dark:text-neutral-400 hover:underline">
           Already have an account? Log in
         </Link>
