@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { getNextQuestion, isFlowComplete, parseAnswer } from "@/lib/journal/flow-engine";
-import type { QuestionFlowDef } from "@/lib/journal-types";
+import type { QuestionFlowDef } from "@/types/journal";
 import { generateMedicalSummary } from "@/lib/llm/summarize";
 
 export async function GET(

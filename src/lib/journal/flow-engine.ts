@@ -1,4 +1,4 @@
-import type { QuestionFlowDef, QuestionDef } from "@/lib/journal-types";
+import type { QuestionFlowDef, QuestionDef } from "@/types/journal";
 
 export function getNextQuestion(
   flow: QuestionFlowDef,

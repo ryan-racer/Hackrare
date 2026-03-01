@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
-import { MIGRAINE_QUESTION_FLOW } from "../src/lib/journal-types";
+import { MIGRAINE_QUESTION_FLOW } from "../src/types/journal";
 
 const prisma = new PrismaClient();
 

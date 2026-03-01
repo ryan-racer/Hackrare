@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import { APP_NAME } from "@/constants";
 
 export const metadata: Metadata = {
-  title: "Symptom Journal",
+  title: APP_NAME,
   description: "Track symptoms with AI-assisted journaling for you and your doctor",
 };
 
