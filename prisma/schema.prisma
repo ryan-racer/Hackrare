@@ -15,9 +15,21 @@ model User {
   role          String    // "patient" | "doctor"
   emailVerified DateTime?
   image         String?
-  phone         String?  @unique
+  phone         String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  // Patient onboarding (null = not completed)
+  onboardingCompletedAt DateTime?
+  dateOfBirth           DateTime?
+  heightCm              Int?
+  weightKg              Float?
+  pcpName               String?
+  pcpCity               String?
+  pcpState              String?
+  currentDiagnoses      String?   // JSON array of strings
+  currentMedications    String?   // JSON array of { name, dose?, frequency? }
+  allergies             String?
 
   accounts       Account[]
   sessions       Session[]
