@@ -27,7 +27,7 @@ export default async function PatientCheckInDetailPage({
 
   return (
     <div>
-      <Link href="/dashboard/patient" className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block">
+      <Link href="/patient" className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block">
         ← Back to check-ins
       </Link>
       <h1 className="text-2xl font-bold mb-2">{checkIn.template.name}</h1>

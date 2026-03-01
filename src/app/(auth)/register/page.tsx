@@ -31,7 +31,7 @@ export default function RegisterPage() {
         return;
       }
       await signIn("credentials", { email, password, redirect: false });
-      router.push(role === "doctor" ? "/dashboard/doctor" : "/dashboard/patient");
+      router.push(role === "doctor" ? "/doctor" : "/patient");
       router.refresh();
     } catch {
       setError("Something went wrong");

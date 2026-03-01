@@ -14,8 +14,13 @@ build
 dist
 
 # prisma
-prisma/dev.db
-prisma/dev.db-journal
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-shm
+prisma/*.db-wal
+
+# misc data / scratch files
+test.txt
 
 # debug
 npm-debug.log*

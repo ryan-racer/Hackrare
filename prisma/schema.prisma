@@ -25,6 +25,7 @@ model User {
   checkIns       CheckIn[]       @relation("PatientCheckIns")
   journalAssignments JournalAssignment[]
   aiInsights     AIInsight[]
+  generalChats   GeneralChat[]
 }
 
 model AIInsight {
@@ -155,4 +156,26 @@ model CheckInSummary {
   createdAt      DateTime @default(now())
 
   checkIn CheckIn @relation(fields: [checkInId], references: [id], onDelete: Cascade)
+}
+
+model GeneralChat {
+  id            String   @id @default(cuid())
+  patientId     String
+  title         String?
+  extractedData String?  // JSON — AI-extracted structured symptoms/events
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  patient  User                 @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  messages GeneralChatMessage[]
+}
+
+model GeneralChatMessage {
+  id        String   @id @default(cuid())
+  chatId    String
+  role      String   // "user" | "assistant"
+  content   String
+  createdAt DateTime @default(now())
+
+  chat GeneralChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
 }

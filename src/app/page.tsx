@@ -7,8 +7,8 @@ export default async function HomePage() {
   const session = await getServerSession(authOptions);
   if (session?.user) {
     const role = (session.user as { role?: string }).role;
-    if (role === "doctor") redirect("/dashboard/doctor");
-    redirect("/dashboard/patient");
+    if (role === "doctor") redirect("/doctor");
+    redirect("/patient");
   }
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-4">

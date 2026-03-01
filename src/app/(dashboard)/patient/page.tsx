@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { StartCheckInButton } from "@/components/StartCheckInButton";
+import { GeneralChatSection } from "@/components/GeneralChatSection";
 
 export default async function PatientDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -23,8 +24,60 @@ export default async function PatientDashboardPage() {
     include: { template: true },
   });
 
+  const recentExtractions = await prisma.generalChat.findMany({
+    where: { patientId: userId, NOT: { extractedData: null } },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    select: { id: true, title: true, createdAt: true, extractedData: true },
+  });
+
   return (
-    <div>
+    <div className="space-y-8">
+      {/* General AI chat — always available */}
+      <section>
+        <GeneralChatSection />
+      </section>
+
+      <hr className="dark:border-neutral-700" />
+
+      {recentExtractions.length > 0 && (
+        <section>
+          <h2 className="text-lg font-semibold mb-3">Symptoms logged by AI</h2>
+          <div className="space-y-3">
+            {recentExtractions.map((chat: { id: string; title: string | null; createdAt: Date; extractedData: string | null }) => {
+              const data = JSON.parse(chat.extractedData!) as {
+                symptoms: { name: string; severity?: number; duration?: string; onset?: string; notes?: string }[];
+                events: { name: string; notes?: string }[];
+              };
+              return (
+                <div key={chat.id} className="border dark:border-neutral-700 rounded-lg p-4">
+                  <p className="text-xs text-neutral-400 mb-2">
+                    {chat.title ?? "Chat"} — {new Date(chat.createdAt).toLocaleString()}
+                  </p>
+                  {data.symptoms?.map((s, i) => (
+                    <p key={i} className="text-sm">
+                      <span className="font-medium">{s.name}</span>
+                      {s.severity != null && <span className="text-neutral-500 ml-2">· severity {s.severity}/10</span>}
+                      {s.duration && <span className="text-neutral-500 ml-2">· {s.duration}</span>}
+                      {s.notes && <span className="text-neutral-400 ml-2 text-xs">· {s.notes}</span>}
+                    </p>
+                  ))}
+                  {data.events?.map((e, i) => (
+                    <p key={i} className="text-sm">
+                      <span className="font-medium">{e.name}</span>
+                      {e.notes && <span className="text-neutral-500 ml-2">· {e.notes}</span>}
+                    </p>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <hr className="dark:border-neutral-700" />
+
+      <section>
       <h1 className="text-2xl font-bold mb-4">My check-ins</h1>
       {assignments.length > 0 ? (
         <div className="mb-6">
@@ -37,7 +90,7 @@ export default async function PatientDashboardPage() {
         {checkIns.length === 0 ? (
           <li className="text-neutral-600 dark:text-neutral-400">No check-ins yet.</li>
         ) : (
-          checkIns.map((c) => (
+          checkIns.map((c: { id: string; scheduledAt: Date; status: string; template: { name: string }; summary?: { medicalSummary: string } | null }) => (
             <li key={c.id} className="border dark:border-neutral-700 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -48,13 +101,13 @@ export default async function PatientDashboardPage() {
                 </div>
                 <div className="flex gap-2">
                   <Link
-                    href={`/dashboard/patient/chat?id=${c.id}`}
+                    href={`/patient/chat?id=${c.id}`}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     {c.status === "completed" ? "View" : "Continue"}
                   </Link>
                   <Link
-                    href={`/dashboard/patient/check-ins/${c.id}`}
+                    href={`/patient/check-ins/${c.id}`}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     Data
@@ -70,6 +123,7 @@ export default async function PatientDashboardPage() {
           ))
         )}
       </ul>
+      </section>
     </div>
   );
 }

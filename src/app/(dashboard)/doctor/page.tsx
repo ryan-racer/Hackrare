@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { CreatePatientForm } from "@/components/CreatePatientForm";
 
 export default async function DoctorDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -17,7 +18,7 @@ export default async function DoctorDashboardPage() {
     },
   });
 
-  const patientIds = links.map((l) => l.patient.id);
+  const patientIds = links.map((l: { patient: { id: string } }) => l.patient.id);
   const checkIns = await prisma.checkIn.findMany({
     where: { patientId: { in: patientIds } },
     orderBy: { scheduledAt: "desc" },
@@ -31,15 +32,18 @@ export default async function DoctorDashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Patients & check-ins</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">Patients &amp; check-ins</h1>
+        <CreatePatientForm />
+      </div>
       <div className="mb-6 text-neutral-600 dark:text-neutral-400">
         {links.length === 0
-          ? "No patients linked. Share the app with patients so they can register and you can link them."
+          ? "No patients linked yet. Use \"Add patient\" to register a patient."
           : `Showing check-ins for ${links.length} patient(s).`}
       </div>
       <div className="space-y-6">
-        {links.map((link) => {
-          const patientCheckIns = checkIns.filter((c) => c.patientId === link.patient.id);
+        {links.map((link: { patient: { id: string; name: string | null; email: string | null } }) => {
+          const patientCheckIns = checkIns.filter((c: { patientId: string }) => c.patientId === link.patient.id);
           return (
             <section key={link.patient.id} className="border dark:border-neutral-700 rounded-lg p-4">
               <h2 className="font-semibold">
@@ -47,7 +51,7 @@ export default async function DoctorDashboardPage() {
                 <span className="text-sm font-normal text-neutral-500 ml-2">{link.patient.email}</span>
               </h2>
               <Link
-                href={`/dashboard/doctor/patients/${link.patient.id}`}
+                href={`/doctor/patients/${link.patient.id}`}
                 className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
               >
                 View patient details & trends
@@ -56,7 +60,7 @@ export default async function DoctorDashboardPage() {
                 {patientCheckIns.length === 0 ? (
                   <li className="text-sm text-neutral-500">No check-ins yet.</li>
                 ) : (
-                  patientCheckIns.slice(0, 5).map((c) => (
+                  patientCheckIns.slice(0, 5).map((c: { id: string; scheduledAt: Date; template: { name: string }; status: string; summary?: { medicalSummary: string } | null }) => (
                     <li key={c.id} className="text-sm border-l-2 pl-3 dark:border-neutral-600">
                       <span className="text-neutral-500">
                         {new Date(c.scheduledAt).toLocaleDateString()} — {c.template.name} ({c.status})

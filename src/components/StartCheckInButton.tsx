@@ -17,7 +17,7 @@ export function StartCheckInButton({ templateId }: { templateId: string }) {
       });
       const data = await res.json();
       if (data.id) {
-        router.push(`/dashboard/patient/chat?id=${data.id}`);
+        router.push(`/patient/chat?id=${data.id}`);
       } else {
         setLoading(false);
       }
