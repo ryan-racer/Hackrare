@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionWithUser } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
+import { assignDefaultJournalToPatient } from "@/lib/journal/assign-default";
 import { z } from "zod";
 
 const schema = z.object({
@@ -51,6 +52,12 @@ export async function POST(req: Request) {
   await prisma.patientDoctor.create({
     data: { patientId: patient.id, doctorId },
   });
+
+  try {
+    await assignDefaultJournalToPatient(patient.id);
+  } catch (e) {
+    console.error("Failed to assign default journal to new patient:", e);
+  }
 
   return NextResponse.json({
     id: patient.id,

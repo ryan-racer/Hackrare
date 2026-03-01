@@ -1,6 +1,7 @@
 import { Auth0Client } from "@auth0/nextjs-auth0/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
+import { assignDefaultJournalToPatient } from "@/lib/journal/assign-default";
 import type { User as PrismaUser } from "@prisma/client";
 
 export const auth0 = new Auth0Client();
@@ -34,6 +35,11 @@ export async function getSessionWithUser(
         role: "patient",
       },
     });
+    try {
+      await assignDefaultJournalToPatient(dbUser.id);
+    } catch (e) {
+      console.error("Failed to assign default journal to new patient:", e);
+    }
   }
   return {
     email: session.user.email ?? null,
