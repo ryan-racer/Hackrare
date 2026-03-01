@@ -22,6 +22,17 @@ function lbsToKg(lbs: number): number {
   return Math.round((lbs / 2.205) * 10) / 10;
 }
 
+function isAtLeast18(dateOfBirthStr: string): boolean {
+  if (!dateOfBirthStr.trim()) return false;
+  const birth = new Date(dateOfBirthStr);
+  if (Number.isNaN(birth.getTime())) return false;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age >= 18;
+}
+
 type Props = {
   initialName?: string | null;
 };
@@ -112,6 +123,7 @@ export function PatientOnboardingForm({
     if (currentStep === 0) {
       if (!name.trim()) return false;
       if (!dateOfBirth.trim()) return false;
+      if (!isAtLeast18(dateOfBirth)) return false;
       const h = getHeightCm();
       if (h == null || h <= 0) return false;
       const w = getWeightKg();
@@ -132,6 +144,7 @@ export function PatientOnboardingForm({
     if (currentStep === 0) {
       if (!name.trim()) return "Name is required.";
       if (!dateOfBirth.trim()) return "Date of birth is required.";
+      if (!isAtLeast18(dateOfBirth)) return "You must be 18 or older to use this service.";
       const h = getHeightCm();
       if (h == null || h <= 0) return "Height is required.";
       const w = getWeightKg();
@@ -187,6 +200,7 @@ export function PatientOnboardingForm({
     try {
       const res = await fetch("/api/patient/onboarding", {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim() || undefined,
@@ -219,7 +233,10 @@ export function PatientOnboardingForm({
   const labelClass = "block text-sm font-medium text-stone-700 mb-1";
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl">
+    <form
+      onSubmit={(e) => e.preventDefault()}
+      className="max-w-xl"
+    >
       {/* Step indicator */}
       <div className="flex gap-2 mb-8">
         {STEPS.map((label, i) => (

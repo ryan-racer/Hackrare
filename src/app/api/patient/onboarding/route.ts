@@ -47,6 +47,20 @@ export async function PATCH(request: Request) {
 
   const userId = sessionWithUser.user.id;
 
+  if (body.dateOfBirth) {
+    const birth = new Date(body.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    if (age < 18) {
+      return NextResponse.json(
+        { error: "You must be 18 or older to use this service." },
+        { status: 403 }
+      );
+    }
+  }
+
   await prisma.user.update({
     where: { id: userId },
     data: {
