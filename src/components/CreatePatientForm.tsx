@@ -36,7 +36,7 @@ export function CreatePatientForm({ onCreated }: { onCreated?: () => void }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="px-4 py-2 rounded-lg bg-neutral-800 text-white hover:bg-neutral-700 text-sm"
+        className="px-5 py-2.5 rounded-lg bg-stone-900 text-stone-50 font-medium hover:bg-stone-800 transition-colors text-sm"
       >
         + Add patient
       </button>
@@ -44,27 +44,27 @@ export function CreatePatientForm({ onCreated }: { onCreated?: () => void }) {
   }
 
   return (
-    <div className="border dark:border-neutral-700 rounded-lg p-4 max-w-md">
-      <h2 className="font-semibold mb-3">Register new patient</h2>
+    <div className="border border-stone-200 rounded-lg p-5 max-w-md bg-white">
+      <h2 className="font-semibold text-stone-900 mb-3">Register new patient</h2>
       {result ? (
         <div className="space-y-2 text-sm">
-          <p className="text-green-600 dark:text-green-400 font-medium">
+          <p className="text-green-700 font-medium">
             {result.linked ? "Existing patient linked." : "Patient account created."}
           </p>
-          <p><span className="text-neutral-500">Name:</span> {result.name}</p>
-          <p><span className="text-neutral-500">Email:</span> {result.email}</p>
+          <p className="text-stone-700"><span className="text-stone-500">Name:</span> {result.name}</p>
+          <p className="text-stone-700"><span className="text-stone-500">Email:</span> {result.email}</p>
           {result.tempPassword && (
             <p>
-              <span className="text-neutral-500">Temp password:</span>{" "}
-              <code className="bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded font-mono">
+              <span className="text-stone-500">Temp password:</span>{" "}
+              <code className="bg-stone-100 px-2 py-0.5 rounded font-mono text-stone-800">
                 {result.tempPassword}
               </code>
-              <span className="text-neutral-400 ml-2">(share this with the patient)</span>
+              <span className="text-stone-500 ml-2">(share this with the patient)</span>
             </p>
           )}
           <button
             onClick={() => { setResult(null); setOpen(false); }}
-            className="mt-2 px-3 py-1.5 rounded bg-neutral-800 text-white hover:bg-neutral-700 text-sm"
+            className="mt-2 px-4 py-2 rounded-lg bg-stone-900 text-stone-50 font-medium hover:bg-stone-800 text-sm transition-colors"
           >
             Done
           </button>
@@ -72,12 +72,12 @@ export function CreatePatientForm({ onCreated }: { onCreated?: () => void }) {
       ) : (
         <form
           onSubmit={(e) => { e.preventDefault(); mutation.mutate(); }}
-          className="space-y-3"
+          className="space-y-4"
         >
           <div>
-            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1">Patient name</label>
+            <label className="block text-sm text-stone-600 mb-1">Patient name</label>
             <input
-              className="w-full border dark:border-neutral-600 rounded px-3 py-2 text-sm dark:bg-neutral-900"
+              className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:border-transparent"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -85,9 +85,9 @@ export function CreatePatientForm({ onCreated }: { onCreated?: () => void }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1">Email</label>
+            <label className="block text-sm text-stone-600 mb-1">Email</label>
             <input
-              className="w-full border dark:border-neutral-600 rounded px-3 py-2 text-sm dark:bg-neutral-900"
+              className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:border-transparent"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -96,20 +96,20 @@ export function CreatePatientForm({ onCreated }: { onCreated?: () => void }) {
             />
           </div>
           {mutation.error && (
-            <p className="text-red-500 text-sm">{(mutation.error as Error).message}</p>
+            <p className="text-red-600 text-sm">{(mutation.error as Error).message}</p>
           )}
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="px-4 py-2 rounded bg-neutral-800 text-white hover:bg-neutral-700 text-sm disabled:opacity-50"
+              className="px-4 py-2.5 rounded-lg bg-stone-900 text-stone-50 font-medium hover:bg-stone-800 text-sm disabled:opacity-50 transition-colors"
             >
               {mutation.isPending ? "Creating…" : "Create patient"}
             </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="px-4 py-2 rounded border dark:border-neutral-600 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              className="px-4 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-800 font-medium text-sm hover:bg-stone-50 hover:border-stone-400 transition-colors"
             >
               Cancel
             </button>

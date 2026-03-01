@@ -39,18 +39,18 @@ function ChatUI({ chatId }: { chatId: string }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  if (isLoading) return <p className="text-neutral-500 text-sm">Loading…</p>;
+  if (isLoading) return <p className="text-stone-500 text-sm">Loading…</p>;
 
   return (
     <div className="flex flex-col min-w-[720px]">
-      <div className="border dark:border-neutral-700 rounded-t-lg p-4 min-h-[600px] max-h-[65vh] overflow-y-auto space-y-3">
+      <div className="border border-stone-200 rounded-t-lg p-4 min-h-[600px] max-h-[65vh] overflow-y-auto space-y-3 bg-white">
         {messages?.map((m) => (
           <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
                 m.role === "user"
-                  ? "bg-neutral-800 text-white"
-                  : "bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200"
+                  ? "bg-stone-900 text-stone-50"
+                  : "bg-stone-100 text-stone-800"
               }`}
             >
               {m.content}
@@ -60,14 +60,14 @@ function ChatUI({ chatId }: { chatId: string }) {
         <div ref={bottomRef} />
       </div>
       <form
-        className="flex border-x border-b dark:border-neutral-700 rounded-b-lg overflow-hidden"
+        className="flex border border-t-0 border-stone-200 rounded-b-lg overflow-hidden bg-white"
         onSubmit={(e) => {
           e.preventDefault();
           if (input.trim()) sendMutation.mutate(input.trim());
         }}
       >
         <input
-          className="flex-1 px-4 py-3 text-sm dark:bg-neutral-900 outline-none"
+          className="flex-1 px-4 py-3 text-sm bg-white text-stone-900 outline-none placeholder:text-stone-400 focus:ring-2 focus:ring-stone-200"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={sendMutation.isPending ? "Waiting for response…" : "Type how you're feeling…"}
@@ -76,7 +76,7 @@ function ChatUI({ chatId }: { chatId: string }) {
         <button
           type="submit"
           disabled={sendMutation.isPending || !input.trim()}
-          className="px-5 py-3 text-sm bg-neutral-800 text-white hover:bg-neutral-700 disabled:opacity-50"
+          className="px-5 py-3 text-sm bg-stone-900 text-stone-50 font-medium hover:bg-stone-800 disabled:opacity-50 transition-colors"
         >
           Send
         </button>
@@ -122,19 +122,19 @@ export function GeneralChatSection() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold">Chat with AI</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-stone-900">Chat with AI</h2>
         <button
           onClick={() => newChatMutation.mutate()}
           disabled={newChatMutation.isPending}
-          className="px-3 py-1.5 text-sm rounded bg-neutral-800 text-white hover:bg-neutral-700 disabled:opacity-50"
+          className="px-4 py-2 text-sm rounded-lg bg-stone-900 text-stone-50 font-medium hover:bg-stone-800 disabled:opacity-50 transition-colors"
         >
           {newChatMutation.isPending ? "Starting…" : "+ New chat"}
         </button>
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-500 text-sm">Loading…</p>
+        <p className="text-stone-500 text-sm">Loading…</p>
       ) : (
         <div className="flex gap-4">
           {/* Sidebar: past chats */}
@@ -144,10 +144,10 @@ export function GeneralChatSection() {
                 <button
                   key={c.id}
                   onClick={() => setActiveChatId(c.id)}
-                  className={`w-full text-left px-2 py-1.5 rounded text-sm truncate ${
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm truncate transition-colors ${
                     c.id === activeChatId
-                      ? "bg-neutral-200 dark:bg-neutral-700"
-                      : "hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      ? "bg-stone-100 text-stone-900 font-medium"
+                      : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                   }`}
                 >
                   {c.title ?? new Date(c.createdAt).toLocaleDateString()}
@@ -161,7 +161,7 @@ export function GeneralChatSection() {
             {activeChatId ? (
               <ChatUI chatId={activeChatId} />
             ) : (
-              <p className="text-neutral-500 text-sm">
+              <p className="text-stone-600 text-sm">
                 Start a new chat to tell the AI how you&apos;re feeling.
               </p>
             )}

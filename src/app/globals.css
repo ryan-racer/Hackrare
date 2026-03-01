@@ -19,3 +19,49 @@ body {
   background: var(--background);
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+@keyframes tree-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+.tree-sway {
+  animation: tree-sway 4s ease-in-out infinite;
+  transform-origin: center 85%;
+}
+
+/* Dithered wave – smooth drifting grain (Rice-style) */
+.dither-wave-bg {
+  background-color: #d1fae5;
+}
+
+@keyframes dither-drift-x {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 12px 0;
+  }
+}
+
+.dither-drift {
+  animation: dither-drift-x 20s linear infinite;
+}
+
+.dither-drift-slow {
+  animation: dither-drift-8 28s linear infinite reverse;
+}
+
+@keyframes dither-drift-8 {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 8px 0;
+  }
+}

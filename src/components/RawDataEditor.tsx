@@ -37,33 +37,33 @@ export function RawDataEditor({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border dark:border-neutral-700 overflow-hidden">
+      <div className="rounded-lg border border-stone-200 overflow-hidden bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-neutral-100 dark:bg-neutral-800">
+          <thead className="bg-stone-100">
             <tr>
-              <th className="text-left p-2 font-medium">Field</th>
-              <th className="text-left p-2 font-medium">Value</th>
+              <th className="text-left p-3 font-medium text-stone-900">Field</th>
+              <th className="text-left p-3 font-medium text-stone-900">Value</th>
             </tr>
           </thead>
           <tbody>
             {entries.length === 0 ? (
               <tr>
-                <td colSpan={2} className="p-4 text-neutral-500">
+                <td colSpan={2} className="p-4 text-stone-500">
                   No data yet (complete the chat to fill this).
                 </td>
               </tr>
             ) : (
               entries.map(([key, value]) => (
-                <tr key={key} className="border-t dark:border-neutral-700">
-                  <td className="p-2 font-medium">{key}</td>
-                  <td className="p-2">
+                <tr key={key} className="border-t border-stone-200">
+                  <td className="p-3 font-medium text-stone-800">{key}</td>
+                  <td className="p-3">
                     <input
                       type="text"
                       value={String(value ?? "")}
                       onChange={(e) =>
                         setRawData((prev) => ({ ...prev, [key]: e.target.value }))
                       }
-                      className="w-full rounded px-2 py-1 border dark:bg-neutral-900 dark:border-neutral-700"
+                      className="w-full rounded-lg px-2 py-1.5 border border-stone-300 bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-200"
                     />
                   </td>
                 </tr>
@@ -73,7 +73,7 @@ export function RawDataEditor({
         </table>
       </div>
       <div className="flex items-center gap-4">
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 text-stone-700 text-sm">
           <input
             type="checkbox"
             checked={reSummarize}
@@ -85,7 +85,7 @@ export function RawDataEditor({
           type="button"
           onClick={handleSave}
           disabled={saving || entries.length === 0}
-          className="px-4 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 disabled:opacity-50"
+          className="px-4 py-2.5 bg-stone-900 text-stone-50 font-medium rounded-lg hover:bg-stone-800 disabled:opacity-50 transition-colors"
         >
           {saving ? "Saving…" : "Save changes"}
         </button>

@@ -10,8 +10,8 @@ export function DashboardNav({ role }: { role?: string }) {
 
   if (role === "doctor") {
     return (
-      <nav className="w-48 border-r dark:border-neutral-700 p-4 flex flex-col gap-2">
-        <Link href="/doctor" className="text-sm font-medium hover:underline">
+      <nav className="w-52 border-r border-stone-200 bg-white p-6 flex flex-col gap-2">
+        <Link href="/doctor" className="text-sm font-medium text-stone-700 hover:text-stone-900 transition-colors">
           Patients &amp; check-ins
         </Link>
       </nav>
@@ -27,15 +27,15 @@ export function DashboardNav({ role }: { role?: string }) {
   const isPatientPage = pathname === "/patient";
 
   return (
-    <nav className="w-48 border-r dark:border-neutral-700 p-4 flex flex-col gap-1">
+    <nav className="w-52 border-r border-stone-200 bg-white p-6 flex flex-col gap-1">
       {patientTabs.map((t) => (
         <Link
           key={t.key}
           href={`/patient?tab=${t.key}`}
-          className={`text-sm px-3 py-2 rounded-lg transition-colors ${
+          className={`text-sm px-3 py-2.5 rounded-lg transition-colors ${
             isPatientPage && tab === t.key
-              ? "bg-neutral-100 dark:bg-neutral-800 font-semibold text-neutral-900 dark:text-white"
-              : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+              ? "bg-stone-100 font-semibold text-stone-900"
+              : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
           }`}
         >
           {t.label}

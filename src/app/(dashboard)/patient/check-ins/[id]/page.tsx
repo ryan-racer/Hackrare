@@ -26,16 +26,16 @@ export default async function PatientCheckInDetailPage({
 
   return (
     <div>
-      <Link href="/patient" className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block">
+      <Link href="/patient" className="text-sm text-stone-700 hover:text-stone-900 transition-colors mb-4 inline-block">
         ← Back to check-ins
       </Link>
-      <h1 className="text-2xl font-bold mb-2">{checkIn.template.name}</h1>
-      <p className="text-neutral-500 text-sm mb-6">
+      <h1 className="text-3xl font-semibold tracking-tight text-stone-900 mb-2">{checkIn.template.name}</h1>
+      <p className="text-stone-500 text-sm mb-6">
         {new Date(checkIn.scheduledAt).toLocaleString()} — {checkIn.status}
       </p>
 
       <section className="mb-8">
-        <h2 className="font-semibold mb-2">Raw data (you can edit)</h2>
+        <h2 className="font-semibold text-stone-900 mb-2">Raw data (you can edit)</h2>
         <RawDataEditor
           checkInId={checkIn.id}
           initialRawData={rawData}
@@ -45,8 +45,8 @@ export default async function PatientCheckInDetailPage({
 
       {checkIn.summary && (
         <section>
-          <h2 className="font-semibold mb-2">Summary for your doctor</h2>
-          <p className="text-neutral-700 dark:text-neutral-300 rounded-lg bg-neutral-100 dark:bg-neutral-800 p-4">
+          <h2 className="font-semibold text-stone-900 mb-2">Summary for your doctor</h2>
+          <p className="text-stone-700 rounded-lg bg-stone-100 p-4 leading-relaxed">
             {checkIn.summary.medicalSummary}
           </p>
         </section>

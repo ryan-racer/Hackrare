@@ -11,15 +11,15 @@ function ChatContent() {
   if (!checkInId) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-4">Chat</h1>
-        <p className="text-neutral-600 dark:text-neutral-400">Select a check-in from My check-ins or start a new one.</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-900 mb-4">Chat</h1>
+        <p className="text-stone-600 leading-relaxed">Select a check-in from My check-ins or start a new one.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Check-in</h1>
+      <h1 className="text-3xl font-semibold tracking-tight text-stone-900 mb-4">Check-in</h1>
       <ChatThread checkInId={checkInId} />
     </div>
   );
@@ -27,7 +27,7 @@ function ChatContent() {
 
 export default function PatientChatPage() {
   return (
-    <Suspense fallback={<p className="text-neutral-500">Loading…</p>}>
+    <Suspense fallback={<p className="text-stone-500">Loading…</p>}>
       <ChatContent />
     </Suspense>
   );

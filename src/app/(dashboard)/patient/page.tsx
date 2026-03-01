@@ -36,8 +36,8 @@ export default async function PatientDashboardPage({
   ]);
 
   return (
-    <div className="max-w-7xl mx-auto py-6 px-4">
-      <h1 className="text-2xl font-bold mb-6">My Health</h1>
+    <div className="max-w-7xl mx-auto">
+      <h1 className="text-3xl font-semibold tracking-tight text-stone-900 mb-8">My Health</h1>
       <PatientTabs
         activeTab={activeTab}
         checkIns={checkIns.map((c: { id: string; scheduledAt: Date; status: string; template: { id: string; name: string }; summary: { medicalSummary: string } | null }) => ({

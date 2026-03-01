@@ -41,24 +41,24 @@ export default async function DoctorPatientPage({
 
   return (
     <div>
-      <Link href="/doctor" className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4 inline-block">
+      <Link href="/doctor" className="text-sm text-stone-700 hover:text-stone-900 transition-colors mb-4 inline-block">
         ← Back to patients
       </Link>
-      <h1 className="text-2xl font-bold mb-2">
+      <h1 className="text-3xl font-semibold tracking-tight text-stone-900 mb-2">
         {link.patient.name ?? link.patient.email}
       </h1>
-      <p className="text-neutral-500 text-sm mb-8">{link.patient.email}</p>
+      <p className="text-stone-500 text-sm mb-8">{link.patient.email}</p>
 
       <TrendsCharts patientId={patientId} />
 
       <section className="mt-8 mb-8">
-        <h2 className="font-semibold text-lg mb-2">AI trend analysis</h2>
+        <h2 className="font-semibold text-lg text-stone-900 mb-2">AI trend analysis</h2>
         <AIInsightSection patientId={patientId} initialInsights={insights} />
       </section>
 
       {generalChats.length > 0 && (
         <section className="mt-8 mb-8">
-          <h2 className="font-semibold text-lg mb-4">Symptom logs (from AI chat)</h2>
+          <h2 className="font-semibold text-lg text-stone-900 mb-4">Symptom logs (from AI chat)</h2>
           <div className="space-y-4">
             {generalChats.map((chat: { id: string; title: string | null; createdAt: Date; extractedData: string | null }) => {
               const data = JSON.parse(chat.extractedData!) as {
@@ -71,13 +71,13 @@ export default async function DoctorPatientPage({
                 events: { name: string; notes?: string }[];
               };
               return (
-                <div key={chat.id} className="border dark:border-neutral-700 rounded-lg p-4">
-                  <p className="text-sm text-neutral-500 mb-2">
+                <div key={chat.id} className="border border-stone-200 rounded-lg p-4 bg-white">
+                  <p className="text-sm text-stone-500 mb-2">
                     {chat.title ?? "Chat"} — {new Date(chat.createdAt).toLocaleString()}
                   </p>
                   {data.symptoms?.length > 0 && (
                     <div className="mb-2">
-                      <p className="text-xs font-semibold uppercase text-neutral-400 mb-2">Symptoms</p>
+                      <p className="text-xs font-semibold uppercase text-stone-500 mb-2">Symptoms</p>
                       <ul className="space-y-3">
                         {data.symptoms.map((s, i) => {
                           const fields = [
@@ -102,8 +102,8 @@ export default async function DoctorPatientPage({
                                 <div className="mt-1 grid grid-cols-2 gap-x-6 gap-y-0.5">
                                   {fields.map(({ label, value }) => (
                                     <div key={label} className="flex gap-1.5 text-xs">
-                                      <span className="text-neutral-400 shrink-0">{label}:</span>
-                                      <span className="text-neutral-600 dark:text-neutral-300">{value}</span>
+                                      <span className="text-stone-400 shrink-0">{label}:</span>
+                                      <span className="text-stone-700">{value}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -116,12 +116,12 @@ export default async function DoctorPatientPage({
                   )}
                   {data.events?.length > 0 && (
                     <div>
-                      <p className="text-xs font-semibold uppercase text-neutral-400 mb-1">Events</p>
+                      <p className="text-xs font-semibold uppercase text-stone-500 mb-1">Events</p>
                       <ul className="space-y-1">
                         {data.events.map((e, i) => (
                           <li key={i} className="text-sm">
-                            <span className="font-medium">{e.name}</span>
-                            {e.notes && <span className="text-neutral-500 ml-2">· {e.notes}</span>}
+                            <span className="font-medium text-stone-900">{e.name}</span>
+                            {e.notes && <span className="text-stone-500 ml-2">· {e.notes}</span>}
                           </li>
                         ))}
                       </ul>
@@ -135,20 +135,20 @@ export default async function DoctorPatientPage({
       )}
 
       <section>
-        <h2 className="font-semibold text-lg mb-4">Check-in history</h2>
+        <h2 className="font-semibold text-lg text-stone-900 mb-4">Check-in history</h2>
         <ul className="space-y-4">
           {checkIns.map((c: { id: string; scheduledAt: Date; template: { name: string }; summary?: { medicalSummary: string } | null }) => (
-            <li key={c.id} className="border dark:border-neutral-700 rounded-lg p-4">
+            <li key={c.id} className="border border-stone-200 rounded-lg p-4 bg-white">
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="font-medium">{c.template.name}</span>
-                  <span className="text-neutral-500 text-sm ml-2">
+                  <span className="font-medium text-stone-900">{c.template.name}</span>
+                  <span className="text-stone-500 text-sm ml-2">
                     {new Date(c.scheduledAt).toLocaleString()}
                   </span>
                 </div>
               </div>
               {c.summary && (
-                <p className="mt-2 text-neutral-700 dark:text-neutral-300">
+                <p className="mt-2 text-stone-700 leading-relaxed">
                   {c.summary.medicalSummary}
                 </p>
               )}

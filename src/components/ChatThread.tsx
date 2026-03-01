@@ -40,14 +40,14 @@ export function ChatThread({ checkInId }: { checkInId: string }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  if (isLoading) return <p className="text-neutral-500">Loading…</p>;
+  if (isLoading) return <p className="text-stone-500">Loading…</p>;
 
   const lastMessage = messages?.length ? messages[messages.length - 1] : null;
   const isAssistantLast = lastMessage?.role === "assistant";
 
   return (
     <div className="flex flex-col max-w-2xl">
-      <div className="border dark:border-neutral-700 rounded-t-lg p-4 min-h-[300px] max-h-[50vh] overflow-y-auto space-y-3">
+      <div className="border border-stone-200 rounded-t-lg p-4 min-h-[300px] max-h-[50vh] overflow-y-auto space-y-3 bg-white">
         {messages?.map((m: { id: string; role: string; content: string }) => (
           <div
             key={m.id}
@@ -56,8 +56,8 @@ export function ChatThread({ checkInId }: { checkInId: string }) {
             <div
               className={`max-w-[85%] rounded-lg px-3 py-2 ${
                 m.role === "user"
-                  ? "bg-neutral-800 text-white"
-                  : "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                  ? "bg-stone-900 text-stone-50"
+                  : "bg-stone-100 text-stone-800"
               }`}
             >
               {m.content}
@@ -68,7 +68,7 @@ export function ChatThread({ checkInId }: { checkInId: string }) {
       </div>
       {isAssistantLast && (
         <form
-          className="flex gap-2 border border-t-0 dark:border-neutral-700 rounded-b-lg p-2"
+          className="flex gap-2 border border-t-0 border-stone-200 rounded-b-lg p-2 bg-white"
           onSubmit={(e) => {
             e.preventDefault();
             const text = input.trim();
@@ -82,13 +82,13 @@ export function ChatThread({ checkInId }: { checkInId: string }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your answer…"
-            className="flex-1 rounded px-3 py-2 border dark:border-neutral-700 dark:bg-neutral-900"
+            className="flex-1 rounded-lg px-3 py-2 border border-stone-300 bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-200"
             disabled={sendMutation.isPending}
           />
           <button
             type="submit"
             disabled={!input.trim() || sendMutation.isPending}
-            className="px-4 py-2 bg-neutral-800 text-white rounded hover:bg-neutral-700 disabled:opacity-50"
+            className="px-4 py-2 bg-stone-900 text-stone-50 font-medium rounded-lg hover:bg-stone-800 disabled:opacity-50 transition-colors"
           >
             Send
           </button>

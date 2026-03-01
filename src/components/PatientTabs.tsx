@@ -49,33 +49,33 @@ function SymptomRow({ s }: { s: Symptom }) {
       >
         <span className="font-medium group-hover:underline">{s.name}</span>
         {s.severity != null && (
-          <span className="px-2 py-0.5 rounded-full text-xs bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400">
+          <span className="px-2 py-0.5 rounded-full text-xs bg-red-50 text-red-600">
             {s.severity}/10
           </span>
         )}
         {s.duration && (
-          <span className="px-2 py-0.5 rounded-full text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+          <span className="px-2 py-0.5 rounded-full text-xs bg-stone-100 text-stone-600">
             {s.duration}
           </span>
         )}
         {s.onset && (
-          <span className="px-2 py-0.5 rounded-full text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+          <span className="px-2 py-0.5 rounded-full text-xs bg-stone-100 text-stone-600">
             onset: {s.onset}
           </span>
         )}
         {s.notes && (
-          <span className="text-xs text-neutral-400">{s.notes}</span>
+          <span className="text-xs text-stone-500">{s.notes}</span>
         )}
         {detailItems.length > 0 && (
-          <span className="ml-auto text-neutral-400 text-xs">{open ? "▲" : "▼"}</span>
+          <span className="ml-auto text-stone-400 text-xs">{open ? "▲" : "▼"}</span>
         )}
       </button>
       {open && detailItems.length > 0 && (
         <div className="mt-2 pl-1 grid grid-cols-2 gap-x-6 gap-y-1">
           {detailItems.map(({ label, value }) => (
             <div key={label} className="flex gap-1.5 text-xs">
-              <span className="text-neutral-400 shrink-0">{label}:</span>
-              <span className="text-neutral-600 dark:text-neutral-300">{value}</span>
+              <span className="text-stone-400 shrink-0">{label}:</span>
+              <span className="text-stone-700">{value}</span>
             </div>
           ))}
         </div>
@@ -130,17 +130,17 @@ export function PatientTabs({ recentExtractions, checkIns, templateId, activeTab
       {/* Symptoms tab */}
       {activeTab === "symptoms" && (
         <div>
-          <h2 className="text-lg font-semibold mb-4">Symptoms logged by AI</h2>
+          <h2 className="text-lg font-semibold text-stone-900 mb-4">Symptoms logged by AI</h2>
           {recentExtractions.length === 0 ? (
-            <div className="rounded-xl border dark:border-neutral-700 p-8 text-center text-neutral-500">
+            <div className="rounded-lg border border-stone-200 p-8 text-center text-stone-600 bg-white">
               <p className="text-2xl mb-2">🩺</p>
-              <p className="font-medium">No symptoms logged yet</p>
-              <p className="text-sm mt-1">
+              <p className="font-medium text-stone-900">No symptoms logged yet</p>
+              <p className="text-sm mt-1 leading-relaxed">
                 Chat with the AI and describe your symptoms — they&apos;ll appear here.
               </p>
               <Link
                 href="/patient?tab=chat"
-                className="mt-4 inline-block px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-500"
+                className="mt-4 inline-flex items-center justify-center px-6 py-2.5 text-sm rounded-lg bg-stone-900 text-stone-50 font-medium hover:bg-stone-800 transition-colors"
               >
                 Start chatting
               </Link>
@@ -155,10 +155,10 @@ export function PatientTabs({ recentExtractions, checkIns, templateId, activeTab
                 return (
                   <div
                     key={chat.id}
-                    className="rounded-xl border dark:border-neutral-700 p-4 bg-white dark:bg-neutral-900"
+                    className="rounded-lg border border-stone-200 p-4 bg-white"
                   >
-                    <p className="text-xs text-neutral-400 mb-3 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 inline-block" />
+                    <p className="text-xs text-stone-500 mb-3 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-stone-400 inline-block" />
                       {chat.title ?? "Chat"} &mdash;{" "}
                       {new Date(chat.createdAt).toLocaleString()}
                     </p>
@@ -173,9 +173,9 @@ export function PatientTabs({ recentExtractions, checkIns, templateId, activeTab
                       <div className="mt-2 space-y-1">
                         {data.events.map((e, i) => (
                           <div key={i} className="text-sm flex items-center gap-2">
-                            <span className="font-medium">{e.name}</span>
+                            <span className="font-medium text-stone-900">{e.name}</span>
                             {e.notes && (
-                              <span className="text-neutral-500 text-xs">{e.notes}</span>
+                              <span className="text-stone-500 text-xs">{e.notes}</span>
                             )}
                           </div>
                         ))}
@@ -193,18 +193,18 @@ export function PatientTabs({ recentExtractions, checkIns, templateId, activeTab
       {activeTab === "checkins" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">My check-ins</h2>
+            <h2 className="text-lg font-semibold text-stone-900">My check-ins</h2>
             {templateId && <StartCheckInButton templateId={templateId} />}
           </div>
           {!templateId && (
-            <p className="text-sm text-neutral-500 mb-4">
+            <p className="text-sm text-stone-600 mb-4">
               No journal assigned yet — ask your doctor to assign one.
             </p>
           )}
           {checkIns.length === 0 ? (
-            <div className="rounded-xl border dark:border-neutral-700 p-8 text-center text-neutral-500">
+            <div className="rounded-lg border border-stone-200 p-8 text-center text-stone-600 bg-white">
               <p className="text-2xl mb-2">📋</p>
-              <p className="font-medium">No check-ins yet</p>
+              <p className="font-medium text-stone-900">No check-ins yet</p>
               {templateId && (
                 <p className="text-sm mt-1">Click &ldquo;Start new check-in&rdquo; above to begin.</p>
               )}
@@ -214,35 +214,35 @@ export function PatientTabs({ recentExtractions, checkIns, templateId, activeTab
               {checkIns.map((c) => (
                 <li
                   key={c.id}
-                  className="rounded-xl border dark:border-neutral-700 p-4 bg-white dark:bg-neutral-900"
+                  className="rounded-lg border border-stone-200 p-4 bg-white"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="font-medium">{c.template.name}</span>
-                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
+                      <span className="font-medium text-stone-900">{c.template.name}</span>
+                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">
                         {c.status}
                       </span>
-                      <p className="text-xs text-neutral-400 mt-0.5">
+                      <p className="text-xs text-stone-500 mt-0.5">
                         {new Date(c.scheduledAt).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="flex gap-3">
                       <Link
                         href={`/patient/chat?id=${c.id}`}
-                        className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+                        className="text-sm text-stone-700 hover:text-stone-900 transition-colors font-medium"
                       >
                         {c.status === "completed" ? "View" : "Continue"}
                       </Link>
                       <Link
                         href={`/patient/check-ins/${c.id}`}
-                        className="text-sm text-neutral-500 hover:underline"
+                        className="text-sm text-stone-500 hover:text-stone-700 transition-colors"
                       >
                         Raw data
                       </Link>
                     </div>
                   </div>
                   {c.summary && (
-                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2">
+                    <p className="mt-2 text-sm text-stone-600 leading-relaxed line-clamp-2">
                       {c.summary.medicalSummary}
                     </p>
                   )}

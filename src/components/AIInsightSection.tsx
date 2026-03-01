@@ -42,7 +42,7 @@ export function AIInsightSection({
         type="button"
         onClick={() => generate.mutate()}
         disabled={generate.isPending}
-        className="px-4 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 disabled:opacity-50"
+        className="px-4 py-2.5 bg-stone-900 text-stone-50 font-medium rounded-lg hover:bg-stone-800 disabled:opacity-50 transition-colors"
       >
         {generate.isPending ? "Generating…" : "Generate AI trend analysis"}
       </button>
@@ -53,12 +53,12 @@ export function AIInsightSection({
         {insights.map((i: Insight) => (
           <li
             key={i.id}
-            className="rounded-lg bg-neutral-100 dark:bg-neutral-800 p-4 border dark:border-neutral-700"
+            className="rounded-lg bg-stone-100 p-4 border border-stone-200"
           >
-            <p className="text-sm text-neutral-500 mb-1">
+            <p className="text-sm text-stone-500 mb-1">
               {new Date(i.createdAt).toLocaleString()}
             </p>
-            <p className="text-neutral-800 dark:text-neutral-200">{i.content}</p>
+            <p className="text-stone-800 leading-relaxed">{i.content}</p>
           </li>
         ))}
       </ul>

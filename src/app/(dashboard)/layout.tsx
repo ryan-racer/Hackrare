@@ -12,11 +12,11 @@ export default async function DashboardLayout({
   if (!sessionWithUser) redirect("/login");
   const { user, email } = sessionWithUser;
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-stone-50">
       <Header email={email} role={user.role} />
       <div className="flex-1 flex">
         <DashboardNav role={user.role} />
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-8 md:p-12">{children}</main>
       </div>
     </div>
   );
