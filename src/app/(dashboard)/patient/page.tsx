@@ -15,7 +15,7 @@ export default async function PatientDashboardPage({
   const { tab } = await searchParams;
   const activeTab = tab === "journal" ? "journal" : "home";
 
-  const [user, recentExtractions] = await Promise.all([
+  const [user, recentExtractions, checkIns, assignments] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -35,6 +35,18 @@ export default async function PatientDashboardPage({
       take: 20,
       select: { id: true, title: true, createdAt: true, extractedData: true },
     }),
+    prisma.checkIn.findMany({
+      where: { patientId: userId },
+      orderBy: { scheduledAt: "desc" },
+      include: {
+        template: { select: { name: true } },
+        summary: true,
+      },
+    }),
+    prisma.journalAssignment.findMany({
+      where: { patientId: userId, active: true },
+      include: { template: { select: { id: true, name: true } } },
+    }),
   ]);
 
   if (!user) return null;
@@ -51,6 +63,25 @@ export default async function PatientDashboardPage({
         recentExtractions={recentExtractions.map((c: { id: string; title: string | null; createdAt: Date; extractedData: string | null }) => ({
           ...c,
           createdAt: c.createdAt.toISOString(),
+        }))}
+        checkIns={checkIns.map((c: {
+          id: string;
+          scheduledAt: Date;
+          status: string;
+          template: { name: string };
+          summary?: { medicalSummary: string } | null;
+        }) => ({
+          id: c.id,
+          scheduledAt: c.scheduledAt.toISOString(),
+          status: c.status,
+          templateName: c.template.name,
+          summary: c.summary?.medicalSummary ?? null,
+        }))}
+        assignments={assignments.map((a: {
+          template: { id: string; name: string };
+        }) => ({
+          templateId: a.template.id,
+          templateName: a.template.name,
         }))}
       />
     </div>

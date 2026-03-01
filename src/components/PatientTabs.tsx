@@ -11,6 +11,19 @@ type ExtractionEntry = {
   extractedData: string | null;
 };
 
+type CheckInEntry = {
+  id: string;
+  scheduledAt: string;
+  status: string;
+  templateName: string;
+  summary: string | null;
+};
+
+type AssignmentEntry = {
+  templateId: string;
+  templateName: string;
+};
+
 type Props = {
   activeTab: "home" | "journal";
   user: Pick<
@@ -25,12 +38,16 @@ type Props = {
     | "allergies"
   >;
   recentExtractions: ExtractionEntry[];
+  checkIns: CheckInEntry[];
+  assignments: AssignmentEntry[];
 };
 
 export function PatientTabs({
   activeTab,
   user,
   recentExtractions,
+  checkIns,
+  assignments,
 }: Props) {
   if (activeTab === "journal") {
     return (
@@ -42,7 +59,11 @@ export function PatientTabs({
 
   return (
     <div className="flex-1 min-h-0">
-      <PatientHomeView user={user} />
+      <PatientHomeView
+        user={user}
+        checkIns={checkIns}
+        assignments={assignments}
+      />
     </div>
   );
 }

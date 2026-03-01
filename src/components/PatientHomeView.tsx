@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { PatientInfoCard } from "@/components/PatientInfoCard";
 import { GeneralChatSection } from "@/components/GeneralChatSection";
+import { StartCheckInButton } from "@/components/StartCheckInButton";
 import type { User } from "@prisma/client";
 
 const FREQUENCY_OPTIONS = [
@@ -10,6 +12,19 @@ const FREQUENCY_OPTIONS = [
   { value: "every_2_days", label: "Every 2 days" },
   { value: "weekly", label: "Weekly" },
 ] as const;
+
+type CheckInEntry = {
+  id: string;
+  scheduledAt: string;
+  status: string;
+  templateName: string;
+  summary: string | null;
+};
+
+type AssignmentEntry = {
+  templateId: string;
+  templateName: string;
+};
 
 type PatientHomeViewProps = {
   user: Pick<
@@ -23,9 +38,11 @@ type PatientHomeViewProps = {
     | "currentMedications"
     | "allergies"
   >;
+  checkIns: CheckInEntry[];
+  assignments: AssignmentEntry[];
 };
 
-export function PatientHomeView({ user }: PatientHomeViewProps) {
+export function PatientHomeView({ user, checkIns, assignments }: PatientHomeViewProps) {
   const [journalName, setJournalName] = useState("");
   const [frequency, setFrequency] = useState("daily");
   const [time, setTime] = useState("09:00");
@@ -106,6 +123,64 @@ export function PatientHomeView({ user }: PatientHomeViewProps) {
               </p>
             )}
           </form>
+        </div>
+
+        <div className="rounded-xl border border-stone-200/80 bg-white shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-stone-100 bg-stone-50/80">
+            <h2 className="text-base font-semibold text-stone-900">My check-ins</h2>
+            <p className="text-xs text-stone-500 mt-0.5">
+              Start a new check-in or review your past entries.
+            </p>
+          </div>
+          <div className="p-5 space-y-4">
+            {assignments.length > 0 ? (
+              <StartCheckInButton templateId={assignments[0].templateId} />
+            ) : (
+              <p className="text-sm text-stone-600">
+                No journal assigned. Ask your doctor to assign one.
+              </p>
+            )}
+
+            <div className="border-t border-stone-100 pt-4">
+              {checkIns.length === 0 ? (
+                <p className="text-sm text-stone-500">No check-ins yet.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {checkIns.map((c) => (
+                    <li key={c.id} className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-stone-900">
+                          {c.templateName}
+                        </p>
+                        <p className="text-xs text-stone-500 mt-0.5">
+                          {new Date(c.scheduledAt).toLocaleDateString()} — {c.status}
+                        </p>
+                        {c.summary && (
+                          <p className="mt-1 text-xs text-stone-600 line-clamp-2">
+                            {c.summary}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <Link
+                          href={`/patient/chat?id=${c.id}`}
+                          className="inline-flex items-center justify-center rounded-full border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-900 hover:bg-stone-900 hover:text-stone-50 hover:border-stone-900 transition-colors"
+                        >
+                          {c.status === "completed" ? "View" : "Continue"}
+                        </Link>
+                        <Link
+                          href={`/patient/check-ins/${c.id}`}
+                          className="inline-flex items-center justify-center rounded-full border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-700 hover:border-stone-400 hover:bg-stone-50 transition-colors"
+                        >
+                          Data
+                        </Link>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
