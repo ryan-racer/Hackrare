@@ -42,8 +42,8 @@ function ChatUI({ chatId }: { chatId: string }) {
   if (isLoading) return <p className="text-neutral-500 text-sm">Loading…</p>;
 
   return (
-    <div className="flex flex-col">
-      <div className="border dark:border-neutral-700 rounded-t-lg p-4 min-h-[280px] max-h-[45vh] overflow-y-auto space-y-3">
+    <div className="flex flex-col min-w-[720px]">
+      <div className="border dark:border-neutral-700 rounded-t-lg p-4 min-h-[600px] max-h-[65vh] overflow-y-auto space-y-3">
         {messages?.map((m) => (
           <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
@@ -67,7 +67,7 @@ function ChatUI({ chatId }: { chatId: string }) {
         }}
       >
         <input
-          className="flex-1 px-3 py-2 text-sm dark:bg-neutral-900 outline-none"
+          className="flex-1 px-4 py-3 text-sm dark:bg-neutral-900 outline-none"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={sendMutation.isPending ? "Waiting for response…" : "Type how you're feeling…"}
@@ -76,7 +76,7 @@ function ChatUI({ chatId }: { chatId: string }) {
         <button
           type="submit"
           disabled={sendMutation.isPending || !input.trim()}
-          className="px-4 py-2 text-sm bg-neutral-800 text-white hover:bg-neutral-700 disabled:opacity-50"
+          className="px-5 py-3 text-sm bg-neutral-800 text-white hover:bg-neutral-700 disabled:opacity-50"
         >
           Send
         </button>
@@ -157,7 +157,7 @@ export function GeneralChatSection() {
           )}
 
           {/* Chat area */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-[860px]">
             {activeChatId ? (
               <ChatUI chatId={activeChatId} />
             ) : (

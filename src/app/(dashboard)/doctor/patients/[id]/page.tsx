@@ -63,7 +63,12 @@ export default async function DoctorPatientPage({
           <div className="space-y-4">
             {generalChats.map((chat: { id: string; title: string | null; createdAt: Date; extractedData: string | null }) => {
               const data = JSON.parse(chat.extractedData!) as {
-                symptoms: { name: string; severity?: number; duration?: string; onset?: string; notes?: string }[];
+                symptoms: {
+                  name: string; character?: string; severity?: number; duration?: string;
+                  onset?: string; location?: string; radiation?: string; frequency?: string;
+                  triggers?: string; alleviating?: string; associated?: string;
+                  dailyImpact?: string; medications?: string; notes?: string;
+                }[];
                 events: { name: string; notes?: string }[];
               };
               return (
@@ -73,17 +78,40 @@ export default async function DoctorPatientPage({
                   </p>
                   {data.symptoms?.length > 0 && (
                     <div className="mb-2">
-                      <p className="text-xs font-semibold uppercase text-neutral-400 mb-1">Symptoms</p>
-                      <ul className="space-y-1">
-                        {data.symptoms.map((s, i) => (
-                          <li key={i} className="text-sm">
-                            <span className="font-medium">{s.name}</span>
-                            {s.severity != null && <span className="text-neutral-500 ml-2">severity {s.severity}/10</span>}
-                            {s.duration && <span className="text-neutral-500 ml-2">· {s.duration}</span>}
-                            {s.onset && <span className="text-neutral-500 ml-2">· onset: {s.onset}</span>}
-                            {s.notes && <p className="text-neutral-500 text-xs mt-0.5 ml-2">{s.notes}</p>}
-                          </li>
-                        ))}
+                      <p className="text-xs font-semibold uppercase text-neutral-400 mb-2">Symptoms</p>
+                      <ul className="space-y-3">
+                        {data.symptoms.map((s, i) => {
+                          const fields = [
+                            s.character    ? { label: "Character",    value: s.character }    : null,
+                            s.severity != null ? { label: "Severity", value: `${s.severity}/10` } : null,
+                            s.duration     ? { label: "Duration",     value: s.duration }     : null,
+                            s.onset        ? { label: "Onset",        value: s.onset }        : null,
+                            s.location     ? { label: "Location",     value: s.location }     : null,
+                            s.radiation    ? { label: "Radiates to",  value: s.radiation }    : null,
+                            s.frequency    ? { label: "Frequency",    value: s.frequency }    : null,
+                            s.triggers     ? { label: "Triggers",     value: s.triggers }     : null,
+                            s.alleviating  ? { label: "Relieved by",  value: s.alleviating }  : null,
+                            s.associated   ? { label: "Associated",   value: s.associated }   : null,
+                            s.dailyImpact  ? { label: "Daily impact", value: s.dailyImpact }  : null,
+                            s.medications  ? { label: "Medications",  value: s.medications }  : null,
+                            s.notes        ? { label: "Notes",        value: s.notes }        : null,
+                          ].filter(Boolean) as { label: string; value: string }[];
+                          return (
+                            <li key={i} className="text-sm">
+                              <span className="font-medium">{s.name}</span>
+                              {fields.length > 0 && (
+                                <div className="mt-1 grid grid-cols-2 gap-x-6 gap-y-0.5">
+                                  {fields.map(({ label, value }) => (
+                                    <div key={label} className="flex gap-1.5 text-xs">
+                                      <span className="text-neutral-400 shrink-0">{label}:</span>
+                                      <span className="text-neutral-600 dark:text-neutral-300">{value}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   )}
