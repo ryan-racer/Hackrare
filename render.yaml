@@ -7,6 +7,17 @@ databases:
     plan: free  # use starter for production
 
 services:
+  # Redis (shown as "Key Value" in the Render dashboard) backing the BullMQ
+  # queue that decouples the Twilio webhooks from the OpenAI call.
+  - type: redis
+    name: hackrare-redis
+    plan: free  # NOTE: the free plan has no persistence — queued messages are
+                # lost on restart. Use starter for production.
+    ipAllowList: []  # internal connections only
+    # BullMQ requires eviction to be disabled, otherwise Redis may drop job
+    # data under memory pressure — exactly the message loss we're preventing.
+    maxmemoryPolicy: noeviction
+
   - type: web
     runtime: node
     name: hackrare
@@ -17,6 +28,11 @@ services:
       - key: DATABASE_URL
         fromDatabase:
           name: hackrare-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: hackrare-redis
           property: connectionString
       - key: NODE_VERSION
         value: "20"
@@ -31,6 +47,9 @@ services:
         sync: false
       - key: AUTH0_CLIENT_SECRET
         sync: false
+      # Required so the webhook can verify Twilio's request signature
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
       # Optional
       # - key: OPENAI_API_KEY
       #   sync: false
@@ -41,3 +60,38 @@ services:
       #   sync: false
       # - key: NEXTAUTH_SECRET
       #   generateValue: true
+
+  # Background worker: drains the inbound queue, calls OpenAI, and delivers
+  # replies via the Twilio REST API. Without this service running, inbound
+  # messages queue up and are never answered.
+  - type: worker
+    runtime: node
+    name: hackrare-worker
+    buildCommand: npm install && npx prisma generate
+    startCommand: npm run worker
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hackrare-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: hackrare-redis
+          property: connectionString
+      - key: NODE_VERSION
+        value: "20"
+      - key: WORKER_CONCURRENCY
+        value: "5"
+      # The worker sends the replies, so it needs the outbound credentials.
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_TEXT_FROM
+        sync: false
+      # Only needed if you use the WhatsApp webhook
+      # - key: TWILIO_WHATSAPP_FROM
+      #   sync: false
+      - key: OPENAI_API_KEY
+        sync: false
