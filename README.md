@@ -7,6 +7,7 @@ Full-stack app for patients to track symptoms via an LLM-assisted chatbot. Docto
 - **Next.js 15** (App Router), **React 19**, **Tailwind CSS**
 - **Auth0** (primary login), **PostgreSQL**, **Prisma**
 - **OpenAI** (summaries, trend analysis, general chat), **TanStack Query**, **Recharts**
+- **Twilio** (SMS/WhatsApp), **BullMQ + Redis** (background queue for inbound messages)
 
 ## Local setup
 
@@ -29,6 +30,7 @@ Full-stack app for patients to track symptoms via an LLM-assisted chatbot. Docto
      - `APP_BASE_URL` (e.g. `http://localhost:3000`)
    - **Auth0 app settings:** Allowed Callback URLs = `http://localhost:3000/auth/callback`, `http://localhost:3000/api/auth/complete-provider-signup` (for provider sign-up), Allowed Logout URLs = `http://localhost:3000`
    - **Optional:** `OPENAI_API_KEY`, `CRON_SECRET` (for cron endpoint)
+   - **Twilio + queue (only if using SMS/WhatsApp):** `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_TEXT_FROM`, and `REDIS_URL`. See [docs/SMS_SETUP.md](docs/SMS_SETUP.md).
 
 3. **Database**
 
@@ -42,6 +44,15 @@ Full-stack app for patients to track symptoms via an LLM-assisted chatbot. Docto
 
    ```bash
    npm run dev
+   ```
+
+   If you're working on the SMS/WhatsApp bot, also start Redis and the queue
+   worker in separate terminals — inbound messages are answered by the worker,
+   not by the webhook:
+
+   ```bash
+   redis-server      # brew install redis
+   npm run worker
    ```
 
 ## Seed accounts (credentials login)
